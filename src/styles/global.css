@@ -22,9 +22,11 @@
     @apply bg-paper text-ink font-sans antialiased;
   }
 
-  /* The home page locks scroll. Other pages let scroll through. */
-  body.no-scroll {
-    @apply overflow-hidden;
+  /* The home page locks scroll on desktop. Mobile needs to scroll when stacked. */
+  @media (min-width: 769px) {
+    body.no-scroll {
+      @apply overflow-hidden;
+    }
   }
 }
 
@@ -32,7 +34,7 @@
 @layer components {
   /* ----- Nav ----- */
   .nav-top {
-    @apply fixed top-0 left-0 right-0 z-50 grid grid-cols-2 items-center h-[72px] text-sm text-ink;
+    @apply fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-[72px] text-sm text-ink;
     pointer-events: none;
   }
   .nav-top > * {
@@ -43,6 +45,14 @@
   }
   .nav-top__right {
     @apply px-12 flex items-center justify-end h-full;
+  }
+  @media (max-width: 768px) {
+    .nav-top__left {
+      @apply px-5;
+    }
+    .nav-top__right {
+      @apply px-5;
+    }
   }
   .nav-top__mark {
     @apply font-serif text-[20px] font-normal tracking-tight text-paper;
@@ -55,6 +65,70 @@
   }
   .nav-top__links {
     @apply flex gap-9;
+  }
+  .nav-top__hamburger {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    color: #4a453d;
+  }
+  .nav-top__hamburger svg {
+    width: 24px;
+    height: 24px;
+  }
+  .nav-top__mobile-menu {
+    display: none;
+  }
+  @media (max-width: 768px) {
+    .nav-top__links {
+      display: none;
+    }
+    .nav-top__hamburger {
+      display: block;
+    }
+    .nav-top__mobile-menu {
+      position: fixed;
+      inset: 0;
+      z-index: 199;
+      background: #fbf8f3;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+    }
+    .nav-top__mobile-menu.is-open {
+      display: flex;
+    }
+    .nav-top__mobile-menu a {
+      font-family: 'Fraunces', serif;
+      font-size: 32px;
+      font-weight: 300;
+      color: #1c1a17;
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    .nav-top__mobile-menu a:hover,
+    .nav-top__mobile-menu a.is-active {
+      color: #b4543e;
+      font-style: italic;
+    }
+    .nav-top__mobile-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      color: #1c1a17;
+    }
+    .nav-top__mobile-close svg {
+      width: 24px;
+      height: 24px;
+    }
   }
   .nav-top__link {
     @apply text-ink-soft no-underline text-sm font-normal relative pb-[3px] transition-colors;
@@ -92,6 +166,14 @@
   }
   .foot__social a:hover {
     @apply text-accent;
+  }
+  @media (max-width: 768px) {
+    .foot {
+      @apply flex-col items-start gap-4 px-0;
+    }
+    .foot__social {
+      @apply gap-4;
+    }
   }
 
   /* ----- Interstitial (the quote curtain) ----- */
@@ -173,5 +255,29 @@
     bottom: 24px;
     letter-spacing: 0.25em;
     opacity: 0.7;
+  }
+  @media (max-width: 768px) {
+    .interstitial {
+      @apply px-6 py-12;
+    }
+    .interstitial__cue {
+      @apply mb-8 text-[9px];
+    }
+    .interstitial__mark {
+      font-size: 60px;
+      height: 36px;
+      @apply mb-4;
+    }
+    .interstitial__quote {
+      font-size: clamp(22px, 5vw, 32px);
+      @apply mb-8;
+    }
+    .interstitial__progress {
+      @apply w-[140px];
+      bottom: 36px;
+    }
+    .interstitial__skip {
+      bottom: 16px;
+    }
   }
 }

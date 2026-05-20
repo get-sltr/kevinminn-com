@@ -65,12 +65,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
     <Interstitial />
 
     <script>
-      // Wire up the quote curtain to any [data-interstitial-link] click.
-      // 4-second auto-dismiss, click anywhere to skip.
       (function () {
         const interstitial = document.getElementById('interstitial');
         if (!interstitial) return;
 
+        const SEEN_KEY = 'interstitial-seen';
         const fill = interstitial.querySelector('[data-fill]') as HTMLElement | null;
         let pendingHref: string | null = null;
         let dismissTimer: ReturnType<typeof setTimeout> | null = null;
@@ -93,8 +92,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
         const dismiss = () => {
           if (dismissTimer) clearTimeout(dismissTimer);
           interstitial.classList.remove('is-active');
+          sessionStorage.setItem(SEEN_KEY, '1');
           if (pendingHref) {
-            // Wait for fade-out before navigating
             setTimeout(() => {
               if (pendingHref) window.location.href = pendingHref;
             }, 500);
@@ -106,7 +105,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
             const href = link.getAttribute('href');
             if (!href || href === window.location.pathname) return;
             e.preventDefault();
-            show(href);
+            if (sessionStorage.getItem(SEEN_KEY)) {
+              window.location.href = href;
+            } else {
+              show(href);
+            }
           });
         });
 

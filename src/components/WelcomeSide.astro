@@ -158,21 +158,31 @@ import Footer from './Footer.astro';
     }
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 768px) {
     .welcome-side {
-      padding: 64px 20px 0;
+      padding: 40px 24px 0;
+      min-height: auto;
+    }
+    .center {
+      justify-content: flex-start;
+    }
+    .eyebrow {
+      margin-bottom: 20px;
     }
     h1 {
-      font-size: clamp(28px, 8vw, 40px);
-    }
-    .lede {
-      font-size: 14px;
+      font-size: clamp(32px, 8vw, 44px);
+      margin-bottom: 24px;
     }
     .greet {
-      font-size: 14px;
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+    .lede {
+      font-size: 15px;
+      margin-bottom: 28px;
     }
     .actions a {
-      padding: 10px 16px;
+      padding: 12px 18px;
       font-size: 12px;
     }
   }

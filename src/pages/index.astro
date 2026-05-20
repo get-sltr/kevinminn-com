@@ -17,4 +17,10 @@ import WelcomeSide from '../components/WelcomeSide.astro';
     display: grid;
     grid-template-columns: 1fr 1fr;
   }
+  @media (max-width: 768px) {
+    .hero {
+      grid-template-columns: 1fr;
+      grid-template-rows: 50vh auto;
+    }
+  }
 </style>
