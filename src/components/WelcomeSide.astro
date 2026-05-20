@@ -1,0 +1,179 @@
+---
+import Footer from './Footer.astro';
+---
+
+<div class="welcome-side">
+  <div class="center">
+    <div class="eyebrow">Welcome</div>
+
+    <p class="greet">I&rsquo;m Kevin. Glad you found your way here.</p>
+
+    <h1>Builder, writer, <em>archivist of becoming.</em></h1>
+
+    <p class="lede">
+      Some of what I make is software. Some of it is sentences. All of it is for the parts of people
+      the world forgets to keep.
+    </p>
+
+    <div class="actions">
+      <a href="/ventures" class="btn-primary" data-interstitial-link>
+        See the work <span class="arr">&rarr;</span>
+      </a>
+      <a href="/writing" class="btn-ghost" data-interstitial-link>
+        Read the writing <span class="arr">&rarr;</span>
+      </a>
+    </div>
+  </div>
+
+  <Footer />
+</div>
+
+<style>
+  .welcome-side {
+    position: relative;
+    padding: 96px 80px 0 80px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 620px;
+  }
+
+  .eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.24em;
+    color: #b4543e;
+    margin-bottom: 28px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 28px;
+    height: 1px;
+    background: #b4543e;
+  }
+
+  .greet {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(20px, 1.5vw, 22px);
+    color: #4a453d;
+    margin-bottom: 16px;
+    letter-spacing: -0.005em;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(56px, 6.2vw, 96px);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    color: #1c1a17;
+    margin-bottom: 36px;
+  }
+
+  h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: #b4543e;
+  }
+
+  .lede {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(18px, 1.4vw, 21px);
+    line-height: 1.55;
+    color: #4a453d;
+    max-width: 540px;
+    margin-bottom: 40px;
+  }
+
+  .actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .actions a {
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    padding: 14px 22px;
+    border-radius: 999px;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: #1c1a17;
+    color: #fbf8f3;
+  }
+  .btn-primary:hover {
+    background: #b4543e;
+    transform: translateY(-1px);
+  }
+
+  .btn-ghost {
+    color: #1c1a17;
+    border: 1px solid #e8e1d2;
+    background: transparent;
+  }
+  .btn-ghost:hover {
+    border-color: #1c1a17;
+  }
+
+  .actions .arr {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  @media (max-width: 980px) {
+    .welcome-side {
+      padding: 80px 32px 0;
+    }
+    h1 {
+      font-size: clamp(36px, 5vw, 56px);
+    }
+    .lede {
+      font-size: 15px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .welcome-side {
+      padding: 64px 20px 0;
+    }
+    h1 {
+      font-size: clamp(28px, 8vw, 40px);
+    }
+    .lede {
+      font-size: 14px;
+    }
+    .greet {
+      font-size: 14px;
+    }
+    .actions a {
+      padding: 10px 16px;
+      font-size: 12px;
+    }
+  }
+</style>

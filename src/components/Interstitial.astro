@@ -1,0 +1,20 @@
+---
+// The quote interstitial. Rendered on every page via Base layout.
+// JS in Base.astro wires up [data-interstitial-link] anchors to trigger it.
+---
+
+<div class="interstitial" id="interstitial" role="dialog" aria-label="Page transition">
+  <div class="interstitial__inner">
+    <div class="interstitial__cue">A line I keep returning to</div>
+    <div class="interstitial__mark">&ldquo;</div>
+    <blockquote class="interstitial__quote">
+      Every life is a long sentence about <span class="interstitial__glow">becoming someone</span> the
+      world did not expect <span class="interstitial__dash">&mdash;</span> and writing it down anyway.
+    </blockquote>
+    <div class="interstitial__attr">Kevin Minn</div>
+  </div>
+  <div class="interstitial__progress">
+    <div class="interstitial__fill" data-fill></div>
+  </div>
+  <div class="interstitial__skip">Click anywhere to continue</div>
+</div>

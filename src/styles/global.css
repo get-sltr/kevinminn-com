@@ -1,0 +1,177 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== FONT FAMILIES ===== */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@400;500;600&display=swap');
+
+/* ===== BASE ===== */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    @apply h-full;
+  }
+
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+  }
+
+  /* The home page locks scroll. Other pages let scroll through. */
+  body.no-scroll {
+    @apply overflow-hidden;
+  }
+}
+
+/* ===== COMPONENT CLASSES (shared across pages) ===== */
+@layer components {
+  /* ----- Nav ----- */
+  .nav-top {
+    @apply fixed top-0 left-0 right-0 z-50 grid grid-cols-2 items-center h-[72px] text-sm text-ink;
+    pointer-events: none;
+  }
+  .nav-top > * {
+    pointer-events: auto;
+  }
+  .nav-top__left {
+    @apply px-12 flex items-center h-full;
+  }
+  .nav-top__right {
+    @apply px-12 flex items-center justify-end h-full;
+  }
+  .nav-top__mark {
+    @apply font-serif text-[20px] font-normal tracking-tight text-paper;
+    text-shadow: 0 1px 16px rgba(0, 0, 0, 0.35);
+  }
+  .nav-top__mark em {
+    @apply italic font-normal not-italic;
+    color: #d89b7e;
+    font-style: italic;
+  }
+  .nav-top__links {
+    @apply flex gap-9;
+  }
+  .nav-top__link {
+    @apply text-ink-soft no-underline text-sm font-normal relative pb-[3px] transition-colors;
+  }
+  .nav-top__link:hover {
+    @apply text-ink;
+  }
+  .nav-top__link.is-active {
+    @apply text-ink;
+  }
+  .nav-top__link.is-active::after {
+    content: '';
+    @apply absolute left-0 bottom-0 w-full h-px bg-accent;
+  }
+
+  /* ----- Footer ----- */
+  .foot {
+    @apply pt-8 pb-9 border-t border-line flex justify-between items-center gap-6 text-xs text-ink-faint flex-wrap;
+  }
+  .foot__left {
+    @apply flex items-center gap-4;
+  }
+  .foot__dot {
+    @apply w-1 h-1 rounded-full bg-accent inline-block;
+  }
+  .foot__signed {
+    @apply font-serif italic text-[13px] text-ink-soft font-normal;
+  }
+  .foot__social {
+    @apply flex items-center gap-5;
+  }
+  .foot__social a {
+    @apply text-ink-soft no-underline text-xs font-medium transition-colors;
+    letter-spacing: 0.04em;
+  }
+  .foot__social a:hover {
+    @apply text-accent;
+  }
+
+  /* ----- Interstitial (the quote curtain) ----- */
+  .interstitial {
+    @apply fixed inset-0 z-[200] flex items-center justify-center px-12 py-20 cursor-pointer opacity-0 pointer-events-none;
+    background: #f4efe6;
+    transition: opacity 0.6s ease;
+  }
+  .interstitial.is-active {
+    @apply opacity-100 pointer-events-auto;
+  }
+  .interstitial::before {
+    content: '';
+    @apply absolute inset-0 pointer-events-none;
+    background:
+      radial-gradient(ellipse at 30% 40%, rgba(180, 84, 62, 0.06), transparent 60%),
+      radial-gradient(ellipse at 75% 70%, rgba(216, 155, 126, 0.07), transparent 65%);
+  }
+  .interstitial__inner {
+    @apply relative z-10 max-w-4xl w-full text-center;
+    transform: translateY(20px);
+    opacity: 0;
+    transition:
+      opacity 0.9s ease 0.15s,
+      transform 0.9s ease 0.15s;
+  }
+  .interstitial.is-active .interstitial__inner {
+    @apply opacity-100;
+    transform: translateY(0);
+  }
+  .interstitial__cue {
+    @apply font-sans text-[10px] font-medium uppercase text-ink-faint mb-14 flex items-center justify-center gap-3.5;
+    letter-spacing: 0.3em;
+  }
+  .interstitial__cue::before,
+  .interstitial__cue::after {
+    content: '';
+    @apply w-7 h-px bg-ink-faint opacity-50;
+  }
+  .interstitial__mark {
+    @apply font-serif italic font-light text-accent mb-7;
+    font-size: clamp(80px, 12vw, 160px);
+    opacity: 0.3;
+    line-height: 0.5;
+    height: 56px;
+  }
+  .interstitial__quote {
+    @apply font-serif font-light italic text-ink mb-12;
+    font-size: clamp(28px, 4vw, 52px);
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+  .interstitial__glow {
+    background: linear-gradient(180deg, transparent 65%, rgba(180, 84, 62, 0.18) 65%);
+    padding: 0 4px;
+  }
+  .interstitial__dash {
+    @apply not-italic text-accent;
+  }
+  .interstitial__attr {
+    @apply font-sans text-[11px] font-medium uppercase text-ink-faint;
+    letter-spacing: 0.3em;
+  }
+  .interstitial__progress {
+    @apply absolute left-1/2 -translate-x-1/2 w-[220px] h-px overflow-hidden;
+    bottom: 48px;
+    background: rgba(28, 26, 23, 0.1);
+  }
+  .interstitial__fill {
+    @apply h-full bg-accent;
+    width: 0%;
+    transition: width 4s linear;
+  }
+  .interstitial.is-active .interstitial__fill {
+    width: 100%;
+  }
+  .interstitial__skip {
+    @apply absolute left-1/2 -translate-x-1/2 font-sans text-[10px] font-medium uppercase text-ink-faint;
+    bottom: 24px;
+    letter-spacing: 0.25em;
+    opacity: 0.7;
+  }
+}

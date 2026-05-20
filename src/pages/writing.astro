@@ -1,0 +1,461 @@
+---
+import Base from '../layouts/Base.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Base
+  activePage="writing"
+  title="Writing — Kevin Minn"
+  description="A passage from the prologue of Remember My Name — a memoir, forthcoming."
+>
+  <!-- Intro framing -->
+  <section class="intro">
+    <div class="intro-inner">
+      <div class="eyebrow">A memoir, forthcoming</div>
+      <h1>Remember <em>My Name.</em></h1>
+      <p class="sub">A passage from the prologue. Set as it will appear on the page.</p>
+      <div class="cue">
+        <span>Turn to first page</span>
+        <span class="line"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- The book-page facsimile -->
+  <section class="book-stage">
+    <article class="book-page">
+      <div class="running-head">Remember My Name</div>
+
+      <div class="chapter-label">Prologue</div>
+      <h2 class="chapter-title">The Sky Between Worlds</h2>
+      <div class="chapter-ornament">&#x2726; &nbsp; &#x2726; &nbsp; &#x2726;</div>
+
+      <div class="prose">
+        <p>
+          I walked through the airport like I belonged, just another uniform melting into the crowd.
+          But inside, everything felt fragile, as if I were stitched together by habit, not hope.
+        </p>
+        <p class="break">I didn&rsquo;t cry. That would come later.</p>
+        <p class="no-indent">
+          But something was already coming undone. Quietly. Deliberately. Without permission.
+        </p>
+        <p class="break">
+          What led me to that moment wasn&rsquo;t one grand collapse. Not a single decision. Not one
+          fall from grace. It was a thousand quiet breaks, each one chipping away at who I thought I
+          was, who I was told I had to be.
+        </p>
+        <p class="break">
+          A thousand moments where I was made to feel small. Unwanted. Wrong. Where I was told, over
+          and over, that being different meant being disposable.
+        </p>
+        <p class="break">
+          But I kept moving. I kept climbing. And even when the system tried to clip my wings, they
+          never truly could.
+        </p>
+        <p class="break">I stayed in the air longer than they expected me to.</p>
+      </div>
+
+      <div class="end-ornament">&mdash; &nbsp; &#x2726; &nbsp; &mdash;</div>
+
+      <div class="folio">iii</div>
+    </article>
+  </section>
+
+  <!-- After the book page -->
+  <section class="after">
+    <div class="after-inner">
+      <div class="h">About the book</div>
+      <h3 class="ttl">Remember <em>My Name.</em></h3>
+      <p class="ttl-sub">A memoir of survival, identity, and the long act of becoming.</p>
+
+      <p class="submission-line"><em>In submission. Representation: querying.</em></p>
+
+      <div class="signup">
+        <p class="lh">Hear when the book finds a home.</p>
+        <p class="lp">One letter, when there&rsquo;s news. No funnel, no spam, no other plans.</p>
+        <form id="writing-signup">
+          <input type="email" placeholder="your@email.com" required aria-label="Email address" />
+          <button type="submit">Notify me</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <Footer />
+</Base>
+
+<style>
+  /* ===== Writing page uses a slightly different paper tone for warmth ===== */
+  :global(body) {
+    background: #f4efe6;
+  }
+  /* Subtle paper grain over the page */
+  :global(body)::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.5;
+  }
+
+  /* The nav sits over a light surface on this page — adjust the brand for contrast */
+  :global(.nav-top__mark) {
+    color: #1c1a17;
+    text-shadow: none;
+  }
+  :global(.nav-top__mark em) {
+    color: #b4543e;
+  }
+
+  /* ===== INTRO STRIP ===== */
+  .intro {
+    padding: 120px 40px 80px;
+    position: relative;
+    z-index: 1;
+  }
+  .intro-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    color: #b4543e;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+  }
+  .eyebrow::before,
+  .eyebrow::after {
+    content: '';
+    width: 36px;
+    height: 1px;
+    background: #b4543e;
+  }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(48px, 6vw, 80px);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    color: #1c1a17;
+    margin-bottom: 20px;
+  }
+  h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: #b4543e;
+  }
+  .sub {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 20px;
+    color: #4a453d;
+    font-weight: 300;
+    max-width: 540px;
+    margin: 0 auto;
+    letter-spacing: -0.005em;
+  }
+  .cue {
+    margin-top: 56px;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    color: #8a8479;
+    text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .cue .line {
+    width: 1px;
+    height: 32px;
+    background: #8a8479;
+    opacity: 0.5;
+  }
+
+  /* ===== THE BOOK PAGE FACSIMILE ===== */
+  .book-stage {
+    padding: 40px 24px 100px;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+  }
+  .book-page {
+    background: #f7f1e3;
+    width: 100%;
+    max-width: 620px;
+    padding: 80px 72px 64px;
+    position: relative;
+    box-shadow:
+      0 50px 100px -20px rgba(28, 26, 23, 0.18),
+      0 20px 40px -12px rgba(28, 26, 23, 0.1),
+      0 0 0 1px rgba(28, 26, 23, 0.04);
+    border-radius: 1px;
+  }
+  .book-page::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.6;
+    border-radius: inherit;
+  }
+  .running-head {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: #8a8479;
+    text-align: center;
+    margin-bottom: 56px;
+    position: relative;
+    z-index: 1;
+  }
+  .chapter-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.4em;
+    color: #8a8479;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+  }
+  .chapter-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 42px;
+    letter-spacing: -0.02em;
+    color: #1c1a17;
+    text-align: center;
+    margin-bottom: 8px;
+    font-style: italic;
+    position: relative;
+    z-index: 1;
+  }
+  .chapter-ornament {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    color: #b4543e;
+    text-align: center;
+    margin-bottom: 48px;
+    position: relative;
+    z-index: 1;
+    letter-spacing: 0.4em;
+  }
+  .prose {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 17px;
+    line-height: 1.7;
+    color: #1c1a17;
+    position: relative;
+    z-index: 1;
+    letter-spacing: 0;
+  }
+  .prose p {
+    margin-bottom: 0;
+    text-indent: 1.5em;
+  }
+  .prose p.no-indent {
+    text-indent: 0;
+  }
+  .prose p.break {
+    margin-top: 18px;
+  }
+  .prose p:first-of-type {
+    text-indent: 0;
+  }
+  .prose p:first-of-type::first-letter {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    float: left;
+    font-size: 60px;
+    line-height: 0.85;
+    margin: 6px 8px -2px 0;
+    color: #1c1a17;
+  }
+  .end-ornament {
+    text-align: center;
+    margin-top: 48px;
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    color: #b4543e;
+    letter-spacing: 0.6em;
+    position: relative;
+    z-index: 1;
+  }
+  .folio {
+    margin-top: 64px;
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-size: 13px;
+    color: #8a8479;
+    position: relative;
+    z-index: 1;
+    font-style: italic;
+  }
+
+  /* ===== AFTER THE BOOK ===== */
+  .after {
+    padding: 60px 40px 100px;
+    position: relative;
+    z-index: 1;
+  }
+  .after-inner {
+    max-width: 620px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .h {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    color: #8a8479;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .ttl {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(32px, 4vw, 48px);
+    color: #1c1a17;
+    letter-spacing: -0.025em;
+    margin-bottom: 12px;
+    line-height: 1;
+  }
+  .ttl em {
+    font-style: italic;
+    font-weight: 400;
+    color: #b4543e;
+  }
+  .ttl-sub {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: #4a453d;
+    margin-bottom: 24px;
+  }
+  .submission-line {
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    color: #4a453d;
+    margin-bottom: 56px;
+    letter-spacing: 0.02em;
+  }
+  .submission-line em {
+    font-style: italic;
+  }
+
+  .signup {
+    background: #fbf8f3;
+    padding: 36px 32px;
+    border-radius: 4px;
+    text-align: left;
+    border: 1px solid #e8e1d2;
+  }
+  .signup .lh {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 22px;
+    color: #1c1a17;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  .signup .lp {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: #4a453d;
+    margin-bottom: 20px;
+    line-height: 1.55;
+  }
+  .signup form {
+    display: flex;
+    gap: 8px;
+  }
+  .signup input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid #e8e1d2;
+    background: #f4efe6;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: #1c1a17;
+    border-radius: 999px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .signup input:focus {
+    border-color: #b4543e;
+  }
+  .signup input::placeholder {
+    color: #8a8479;
+  }
+  .signup button {
+    background: #1c1a17;
+    color: #fbf8f3;
+    border: 0;
+    padding: 12px 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .signup button:hover {
+    background: #b4543e;
+  }
+
+  @media (max-width: 720px) {
+    .intro {
+      padding: 90px 24px 50px;
+    }
+    .book-page {
+      padding: 56px 36px 48px;
+    }
+    .chapter-title {
+      font-size: 32px;
+    }
+    .prose {
+      font-size: 16px;
+    }
+    .signup form {
+      flex-direction: column;
+    }
+  }
+</style>
+
+<script>
+  // Newsletter signup placeholder. Replace with real handler (Buttondown / Substack / etc.)
+  // when ready. For now, intercept and show a confirmation so the page doesn't reload.
+  const form = document.getElementById('writing-signup') as HTMLFormElement | null;
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = form.querySelector('input[type="email"]') as HTMLInputElement | null;
+      if (input?.value) {
+        console.log('Newsletter signup pending real handler. Submitted email:', input.value);
+        form.innerHTML =
+          '<p style="font-family:Fraunces,serif;font-style:italic;color:#4a453d;font-size:16px;">Thank you. You will hear from me.</p>';
+      }
+    });
+  }
+</script>

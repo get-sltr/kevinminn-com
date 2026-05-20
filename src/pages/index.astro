@@ -1,0 +1,20 @@
+---
+import Base from '../layouts/Base.astro';
+import PhotoSide from '../components/PhotoSide.astro';
+import WelcomeSide from '../components/WelcomeSide.astro';
+---
+
+<Base activePage="welcome" noScroll={true}>
+  <section class="hero">
+    <PhotoSide />
+    <WelcomeSide />
+  </section>
+</Base>
+
+<style>
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+</style>

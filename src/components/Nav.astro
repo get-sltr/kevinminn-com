@@ -1,0 +1,37 @@
+---
+export interface Props {
+  activePage?: 'welcome' | 'ventures' | 'writing' | 'about' | 'contact';
+}
+const { activePage = 'welcome' } = Astro.props;
+
+const links: Array<{ key: NonNullable<Props['activePage']>; label: string; href: string }> = [
+  { key: 'welcome', label: 'Welcome', href: '/' },
+  { key: 'ventures', label: 'Ventures', href: '/ventures' },
+  { key: 'writing', label: 'Writing', href: '/writing' },
+  { key: 'about', label: 'About', href: '/about' },
+  { key: 'contact', label: 'Contact', href: '/contact' },
+];
+---
+
+<nav class="nav-top">
+  <div class="nav-top__left">
+    <a href="/" class="nav-top__mark" data-interstitial-link>
+      kevin <em>minn</em>
+    </a>
+  </div>
+  <div class="nav-top__right">
+    <div class="nav-top__links">
+      {
+        links.map((link) => (
+          <a
+            href={link.href}
+            class={`nav-top__link ${link.key === activePage ? 'is-active' : ''}`}
+            data-interstitial-link
+          >
+            {link.label}
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</nav>

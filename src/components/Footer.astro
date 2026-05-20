@@ -1,0 +1,21 @@
+---
+const year = new Date().getFullYear();
+
+const social = [
+  { label: 'LinkedIn', href: 'https://linkedin.com/in/kevinminn' },
+  { label: 'GitHub', href: 'https://github.com/kevinminn' },
+  { label: 'Substack', href: '#' },
+  { label: 'Email', href: 'mailto:hello@kevinminn.com' },
+];
+---
+
+<footer class="foot">
+  <div class="foot__left">
+    <span>&copy; {year} Kevin Minn</span>
+    <span class="foot__dot"></span>
+    <span class="foot__signed">made in Los Angeles</span>
+  </div>
+  <div class="foot__social">
+    {social.map((s) => <a href={s.href}>{s.label}</a>)}
+  </div>
+</footer>

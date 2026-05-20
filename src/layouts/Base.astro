@@ -1,0 +1,117 @@
+---
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import Interstitial from '../components/Interstitial.astro';
+
+export interface Props {
+  title?: string;
+  description?: string;
+  activePage?: 'welcome' | 'ventures' | 'writing' | 'about' | 'contact';
+  noScroll?: boolean;
+  ogImage?: string;
+}
+
+const {
+  title = 'Kevin Minn — Builder, writer, archivist of becoming.',
+  description = 'Some of what I make is software. Some of it is sentences. All of it is for the parts of people the world forgets to keep.',
+  activePage = 'welcome',
+  noScroll = false,
+  ogImage = '/assets/og.jpg',
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(ogImage, Astro.site).toString()} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL(ogImage, Astro.site).toString()} />
+
+    <!-- Theme color (Cloudflare / mobile UI) -->
+    <meta name="theme-color" content="#FBF8F3" />
+
+    <!-- Preconnect to Google Fonts for the @import in global.css -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  </head>
+
+  <body class={noScroll ? 'no-scroll' : ''}>
+    <Nav activePage={activePage} />
+
+    <slot />
+
+    <Interstitial />
+
+    <script>
+      // Wire up the quote curtain to any [data-interstitial-link] click.
+      // 4-second auto-dismiss, click anywhere to skip.
+      (function () {
+        const interstitial = document.getElementById('interstitial');
+        if (!interstitial) return;
+
+        const fill = interstitial.querySelector('[data-fill]') as HTMLElement | null;
+        let pendingHref: string | null = null;
+        let dismissTimer: ReturnType<typeof setTimeout> | null = null;
+
+        const show = (href: string) => {
+          pendingHref = href;
+          interstitial.classList.add('is-active');
+          if (fill) {
+            fill.style.transition = 'none';
+            fill.style.width = '0%';
+            void fill.offsetWidth;
+            fill.style.transition = 'width 4s linear';
+            requestAnimationFrame(() => {
+              fill.style.width = '100%';
+            });
+          }
+          dismissTimer = setTimeout(dismiss, 4000);
+        };
+
+        const dismiss = () => {
+          if (dismissTimer) clearTimeout(dismissTimer);
+          interstitial.classList.remove('is-active');
+          if (pendingHref) {
+            // Wait for fade-out before navigating
+            setTimeout(() => {
+              if (pendingHref) window.location.href = pendingHref;
+            }, 500);
+          }
+        };
+
+        document.querySelectorAll<HTMLAnchorElement>('[data-interstitial-link]').forEach((link) => {
+          link.addEventListener('click', (e) => {
+            const href = link.getAttribute('href');
+            if (!href || href === window.location.pathname) return;
+            e.preventDefault();
+            show(href);
+          });
+        });
+
+        interstitial.addEventListener('click', dismiss);
+      })();
+    </script>
+  </body>
+</html>

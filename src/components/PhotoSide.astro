@@ -1,0 +1,81 @@
+---
+// Left half of the home page: full-bleed portrait with two corner overlays.
+---
+
+<div class="photo-side relative h-screen overflow-hidden">
+  <img
+    src="/assets/portrait.jpg"
+    alt="Kevin Minn on a Los Angeles street, navy blazer, white shirt, smiling in afternoon light"
+    class="w-full h-full object-cover block"
+  />
+  <span class="photo-tag">a portrait, in motion</span>
+  <span class="photo-stamp">Los Angeles &middot; <span>2026</span></span>
+</div>
+
+<style>
+  /* Photo overlay vignette so the nav reads cleanly */
+  .photo-side::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(90deg, transparent 75%, rgba(28, 26, 23, 0.08) 100%),
+      linear-gradient(
+        180deg,
+        rgba(28, 26, 23, 0.05) 0%,
+        transparent 20%,
+        transparent 80%,
+        rgba(28, 26, 23, 0.1) 100%
+      );
+  }
+
+  .photo-tag {
+    position: absolute;
+    bottom: 32px;
+    left: 32px;
+    z-index: 2;
+    background: rgba(251, 248, 243, 0.94);
+    backdrop-filter: blur(8px);
+    padding: 8px 14px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: #1c1a17;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    border-radius: 2px;
+  }
+
+  .photo-stamp {
+    position: absolute;
+    bottom: 36px;
+    right: 32px;
+    z-index: 2;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    color: #fbf8f3;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 500;
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .photo-stamp span {
+    color: #d89b7e;
+  }
+
+  @media (max-width: 980px) {
+    .photo-tag {
+      bottom: 20px;
+      left: 20px;
+      font-size: 12px;
+      padding: 6px 10px;
+    }
+    .photo-stamp {
+      bottom: 24px;
+      right: 20px;
+      font-size: 10px;
+    }
+  }
+</style>
