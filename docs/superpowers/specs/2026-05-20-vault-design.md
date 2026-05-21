@@ -109,8 +109,9 @@ Located at `/vault`. Matches site visual language (paper/ink palette, Fraunces +
 ### astro.config.mjs
 
 - Add `@astrojs/cloudflare` adapter
-- Set `output: 'hybrid'`
-- Existing pages keep `export const prerender = true` (or rely on hybrid default of static)
+- Keep default `output: 'static'` (Astro 5 merged hybrid into static)
+- Vault pages and API endpoints use `export const prerender = false` to opt into server rendering
+- Existing static pages need no changes
 
 ### wrangler.toml (new)
 
