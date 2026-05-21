@@ -2,3 +2,6 @@ User-agent: *
 Allow: /
 
 Sitemap: https://kevinminn.com/sitemap.xml
+
+Disallow: /vault
+Disallow: /api/vault

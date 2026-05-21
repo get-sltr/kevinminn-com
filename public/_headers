@@ -13,3 +13,11 @@
 
 /favicon.svg
   Cache-Control: public, max-age=604800
+
+/vault/*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: private, no-store
+
+/api/vault/*
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: private, no-store
