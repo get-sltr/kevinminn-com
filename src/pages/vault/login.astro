@@ -1,0 +1,192 @@
+---
+export const prerender = false;
+import '../../styles/global.css';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vault — Kevin Minn</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#F4EFE6" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  </head>
+  <body class="vault-login-body">
+    <div class="vault-login">
+      <div class="vault-login__card">
+        <div class="vault-login__eyebrow">Private</div>
+        <h1 class="vault-login__title">Vault</h1>
+        <p class="vault-login__sub">Enter your password to continue.</p>
+
+        <form id="vault-login-form" class="vault-login__form">
+          <div class="vault-login__field">
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              required
+              autocomplete="current-password"
+              aria-label="Vault password"
+              class="vault-login__input"
+              id="vault-password"
+            />
+          </div>
+          <p class="vault-login__error" id="vault-error"></p>
+          <button type="submit" class="vault-login__btn" id="vault-submit">
+            Enter vault
+          </button>
+        </form>
+
+        <a href="/" class="vault-login__back">&larr; Back to site</a>
+      </div>
+    </div>
+
+    <script>
+      const form = document.getElementById('vault-login-form') as HTMLFormElement;
+      const errorEl = document.getElementById('vault-error') as HTMLParagraphElement;
+      const input = document.getElementById('vault-password') as HTMLInputElement;
+      const btn = document.getElementById('vault-submit') as HTMLButtonElement;
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        errorEl.textContent = '';
+        btn.disabled = true;
+        btn.textContent = '...';
+
+        const formData = new FormData(form);
+        const res = await fetch('/api/vault/auth', { method: 'POST', body: formData });
+
+        if (res.ok) {
+          window.location.href = '/vault';
+        } else {
+          errorEl.textContent = 'Wrong password.';
+          input.classList.add('shake');
+          setTimeout(() => input.classList.remove('shake'), 500);
+          btn.disabled = false;
+          btn.textContent = 'Enter vault';
+          input.focus();
+        }
+      });
+    </script>
+
+    <style>
+      .vault-login-body {
+        background: #f4efe6;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .vault-login__card {
+        background: #fbf8f3;
+        border: 1px solid #e8e1d2;
+        border-radius: 4px;
+        padding: 48px 40px;
+        max-width: 400px;
+        width: 100%;
+        text-align: center;
+      }
+      .vault-login__eyebrow {
+        font-family: 'Inter', sans-serif;
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.3em;
+        color: #b4543e;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+      }
+      .vault-login__title {
+        font-family: 'Fraunces', serif;
+        font-weight: 300;
+        font-size: 48px;
+        color: #1c1a17;
+        letter-spacing: -0.035em;
+        margin-bottom: 8px;
+      }
+      .vault-login__sub {
+        font-family: 'Fraunces', serif;
+        font-style: italic;
+        font-size: 16px;
+        color: #4a453d;
+        margin-bottom: 32px;
+      }
+      .vault-login__form {
+        text-align: left;
+      }
+      .vault-login__input {
+        width: 100%;
+        padding: 14px 16px;
+        border: 1px solid #e8e1d2;
+        background: #f4efe6;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        color: #1c1a17;
+        border-radius: 999px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .vault-login__input:focus {
+        border-color: #b4543e;
+      }
+      .vault-login__input::placeholder {
+        color: #8a8479;
+      }
+      .vault-login__error {
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        color: #b4543e;
+        min-height: 20px;
+        margin: 12px 0 0;
+        text-align: center;
+      }
+      .vault-login__btn {
+        width: 100%;
+        margin-top: 12px;
+        background: #1c1a17;
+        color: #fbf8f3;
+        border: 0;
+        padding: 14px 20px;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .vault-login__btn:hover {
+        background: #b4543e;
+      }
+      .vault-login__btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .vault-login__back {
+        display: inline-block;
+        margin-top: 24px;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        color: #4a453d;
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+      .vault-login__back:hover {
+        color: #b4543e;
+      }
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-6px); }
+        40%, 80% { transform: translateX(6px); }
+      }
+      .shake {
+        animation: shake 0.4s ease;
+      }
+    </style>
+  </body>
+</html>
