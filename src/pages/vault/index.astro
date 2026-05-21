@@ -1,0 +1,499 @@
+---
+export const prerender = false;
+import '../../styles/global.css';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vault — Kevin Minn</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#FBF8F3" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  </head>
+  <body class="vault-body">
+    <div class="vault">
+      <header class="vault__header">
+        <div class="vault__header-left">
+          <h1 class="vault__title">Vault</h1>
+          <nav class="vault__breadcrumb" id="breadcrumb"></nav>
+        </div>
+        <button class="vault__logout" id="logout-btn">Logout</button>
+      </header>
+
+      <div class="vault__actions">
+        <button class="vault__btn vault__btn--secondary" id="new-folder-btn">+ New folder</button>
+        <label class="vault__btn vault__btn--primary">
+          Upload
+          <input type="file" id="file-input" multiple hidden />
+        </label>
+        <div class="vault__search-wrap">
+          <input type="text" class="vault__search" id="search-input" placeholder="Filter files..." />
+        </div>
+      </div>
+
+      <div class="vault__dropzone" id="dropzone">
+        <p>Drop files here to upload</p>
+      </div>
+
+      <div class="vault__list" id="file-list">
+        <p class="vault__empty">Loading...</p>
+      </div>
+
+      <div class="vault__modal" id="delete-modal">
+        <div class="vault__modal-card">
+          <p class="vault__modal-text" id="delete-text">Delete this item?</p>
+          <div class="vault__modal-actions">
+            <button class="vault__btn vault__btn--secondary" id="delete-cancel">Cancel</button>
+            <button class="vault__btn vault__btn--danger" id="delete-confirm">Delete</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="vault__upload-status" id="upload-status"></div>
+    </div>
+
+    <script>
+      let currentPrefix = '';
+      let deleteTarget: { type: 'file' | 'folder'; key: string } | null = null;
+      const listEl = document.getElementById('file-list')!;
+      const breadcrumbEl = document.getElementById('breadcrumb')!;
+      const searchEl = document.getElementById('search-input') as HTMLInputElement;
+      const dropzone = document.getElementById('dropzone')!;
+      const fileInput = document.getElementById('file-input') as HTMLInputElement;
+      const modal = document.getElementById('delete-modal')!;
+      const deleteText = document.getElementById('delete-text')!;
+      const uploadStatus = document.getElementById('upload-status')!;
+
+      function formatSize(bytes: number): string {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+      }
+
+      function formatDate(iso: string): string {
+        return new Date(iso).toLocaleDateString('en-US', {
+          month: 'short', day: 'numeric', year: 'numeric',
+        });
+      }
+
+      function fileIcon(contentType: string): string {
+        if (contentType.startsWith('image/')) return '\u{1F5BC}';
+        if (contentType === 'application/pdf') return '\u{1F4C4}';
+        if (contentType.includes('spreadsheet') || contentType.includes('excel')) return '\u{1F4CA}';
+        if (contentType.includes('zip') || contentType.includes('compressed')) return '\u{1F4E6}';
+        return '\u{1F4CE}';
+      }
+
+      function updateBreadcrumb() {
+        const parts = currentPrefix.split('/').filter(Boolean);
+        let html = '<button class="vault__crumb" data-prefix="">Root</button>';
+        let acc = '';
+        for (const part of parts) {
+          acc += part + '/';
+          html += ` <span class="vault__crumb-sep">/</span> <button class="vault__crumb" data-prefix="${acc}">${part}</button>`;
+        }
+        breadcrumbEl.innerHTML = html;
+        breadcrumbEl.querySelectorAll<HTMLButtonElement>('.vault__crumb').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            currentPrefix = btn.dataset.prefix || '';
+            loadFiles();
+          });
+        });
+      }
+
+      async function loadFiles() {
+        updateBreadcrumb();
+        const res = await fetch(`/api/vault/list?prefix=${encodeURIComponent(currentPrefix)}`);
+        const data = await res.json();
+        renderList(data.folders, data.files);
+      }
+
+      function renderList(folders: Array<{name: string; prefix: string}>, files: Array<{key: string; name: string; size: number; uploaded: string; contentType: string}>) {
+        const query = searchEl.value.toLowerCase();
+        let html = '';
+
+        for (const folder of folders) {
+          if (query && !folder.name.toLowerCase().includes(query)) continue;
+          html += `<div class="vault__row vault__row--folder" data-prefix="${folder.prefix}">
+            <span class="vault__row-icon">\u{1F4C1}</span>
+            <span class="vault__row-name">${folder.name}</span>
+            <span class="vault__row-meta"></span>
+            <div class="vault__row-actions">
+              <button class="vault__row-btn vault__row-btn--del" data-delete-folder="${folder.prefix}" title="Delete folder">&#x2715;</button>
+            </div>
+          </div>`;
+        }
+
+        for (const file of files) {
+          if (query && !file.name.toLowerCase().includes(query)) continue;
+          html += `<div class="vault__row vault__row--file">
+            <span class="vault__row-icon">${fileIcon(file.contentType)}</span>
+            <span class="vault__row-name">${file.name}</span>
+            <span class="vault__row-meta">${formatSize(file.size)} &middot; ${formatDate(file.uploaded)}</span>
+            <div class="vault__row-actions">
+              <a class="vault__row-btn" href="/api/vault/download?key=${encodeURIComponent(file.key)}" title="Download">&#x2193;</a>
+              <button class="vault__row-btn vault__row-btn--del" data-delete-file="${file.key}" title="Delete">&#x2715;</button>
+            </div>
+          </div>`;
+        }
+
+        if (!html) {
+          html = '<p class="vault__empty">No files yet. Upload something or create a folder.</p>';
+        }
+
+        listEl.innerHTML = html;
+
+        listEl.querySelectorAll<HTMLDivElement>('.vault__row--folder').forEach((row) => {
+          row.addEventListener('click', (e) => {
+            if ((e.target as HTMLElement).closest('.vault__row-btn')) return;
+            currentPrefix = row.dataset.prefix || '';
+            searchEl.value = '';
+            loadFiles();
+          });
+        });
+
+        listEl.querySelectorAll<HTMLButtonElement>('[data-delete-file]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            deleteTarget = { type: 'file', key: btn.dataset.deleteFile! };
+            deleteText.textContent = `Delete "${btn.dataset.deleteFile!.split('/').pop()}"?`;
+            modal.classList.add('is-open');
+          });
+        });
+
+        listEl.querySelectorAll<HTMLButtonElement>('[data-delete-folder]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            deleteTarget = { type: 'folder', key: btn.dataset.deleteFolder! };
+            const name = btn.dataset.deleteFolder!.replace(/\/$/, '').split('/').pop();
+            deleteText.textContent = `Delete folder "${name}"? It must be empty.`;
+            modal.classList.add('is-open');
+          });
+        });
+      }
+
+      async function uploadFiles(files: FileList | File[]) {
+        for (const file of Array.from(files)) {
+          uploadStatus.textContent = `Uploading ${file.name}...`;
+          uploadStatus.classList.add('is-visible');
+          const form = new FormData();
+          form.append('file', file);
+          form.append('folder', currentPrefix);
+          const res = await fetch('/api/vault/upload', { method: 'POST', body: form });
+          if (!res.ok) {
+            uploadStatus.textContent = `Failed to upload ${file.name}`;
+            setTimeout(() => uploadStatus.classList.remove('is-visible'), 3000);
+            return;
+          }
+        }
+        uploadStatus.textContent = 'Upload complete.';
+        setTimeout(() => uploadStatus.classList.remove('is-visible'), 2000);
+        loadFiles();
+      }
+
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files?.length) uploadFiles(fileInput.files);
+        fileInput.value = '';
+      });
+
+      dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('is-drag'); });
+      dropzone.addEventListener('dragleave', () => dropzone.classList.remove('is-drag'));
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('is-drag');
+        if (e.dataTransfer?.files.length) uploadFiles(e.dataTransfer.files);
+      });
+
+      searchEl.addEventListener('input', () => loadFiles());
+
+      document.getElementById('new-folder-btn')!.addEventListener('click', () => {
+        const name = prompt('Folder name:');
+        if (!name) return;
+        fetch('/api/vault/folder', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ parent: currentPrefix, name }),
+        }).then(() => loadFiles());
+      });
+
+      document.getElementById('delete-cancel')!.addEventListener('click', () => {
+        modal.classList.remove('is-open');
+        deleteTarget = null;
+      });
+
+      document.getElementById('delete-confirm')!.addEventListener('click', async () => {
+        if (!deleteTarget) return;
+        if (deleteTarget.type === 'file') {
+          await fetch(`/api/vault/delete?key=${encodeURIComponent(deleteTarget.key)}`, { method: 'DELETE' });
+        } else {
+          const res = await fetch(`/api/vault/folder?prefix=${encodeURIComponent(deleteTarget.key)}`, { method: 'DELETE' });
+          if (!res.ok) {
+            const data = await res.json();
+            alert(data.error || 'Could not delete folder.');
+          }
+        }
+        modal.classList.remove('is-open');
+        deleteTarget = null;
+        loadFiles();
+      });
+
+      document.getElementById('logout-btn')!.addEventListener('click', async () => {
+        await fetch('/api/vault/logout', { method: 'POST' });
+        window.location.href = '/vault/login';
+      });
+
+      loadFiles();
+    </script>
+
+    <style>
+      .vault-body {
+        background: #fbf8f3;
+        min-height: 100vh;
+      }
+      .vault {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 32px 40px;
+      }
+      .vault__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 32px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e8e1d2;
+      }
+      .vault__header-left {
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .vault__title {
+        font-family: 'Fraunces', serif;
+        font-weight: 300;
+        font-size: 32px;
+        color: #1c1a17;
+        letter-spacing: -0.02em;
+      }
+      .vault__breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .vault__crumb {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        color: #4a453d;
+        padding: 0;
+        transition: color 0.15s;
+      }
+      .vault__crumb:hover { color: #b4543e; }
+      .vault__crumb-sep {
+        font-size: 12px;
+        color: #8a8479;
+      }
+      .vault__logout {
+        background: none;
+        border: 1px solid #e8e1d2;
+        padding: 8px 16px;
+        border-radius: 999px;
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        color: #4a453d;
+        cursor: pointer;
+        transition: border-color 0.2s, color 0.2s;
+      }
+      .vault__logout:hover { border-color: #1c1a17; color: #1c1a17; }
+      .vault__actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+      }
+      .vault__btn {
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        padding: 10px 16px;
+        border-radius: 999px;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s;
+      }
+      .vault__btn--primary {
+        background: #1c1a17;
+        color: #fbf8f3;
+      }
+      .vault__btn--primary:hover { background: #b4543e; }
+      .vault__btn--secondary {
+        background: transparent;
+        border: 1px solid #e8e1d2;
+        color: #1c1a17;
+      }
+      .vault__btn--secondary:hover { border-color: #1c1a17; }
+      .vault__btn--danger {
+        background: #b4543e;
+        color: #fbf8f3;
+      }
+      .vault__btn--danger:hover { background: #8b3a29; }
+      .vault__search-wrap { flex: 1; min-width: 160px; }
+      .vault__search {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid #e8e1d2;
+        background: #f4efe6;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        color: #1c1a17;
+        border-radius: 999px;
+        outline: none;
+      }
+      .vault__search:focus { border-color: #b4543e; }
+      .vault__search::placeholder { color: #8a8479; }
+      .vault__dropzone {
+        border: 2px dashed #e8e1d2;
+        border-radius: 4px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 16px;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        color: #8a8479;
+        transition: border-color 0.2s, background 0.2s;
+      }
+      .vault__dropzone.is-drag {
+        border-color: #b4543e;
+        background: rgba(180, 84, 62, 0.04);
+      }
+      .vault__list {
+        display: flex;
+        flex-direction: column;
+      }
+      .vault__row {
+        display: grid;
+        grid-template-columns: 28px 1fr auto auto;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 8px;
+        border-bottom: 1px solid #e8e1d2;
+        transition: background 0.1s;
+      }
+      .vault__row--folder { cursor: pointer; }
+      .vault__row:hover { background: rgba(244, 239, 230, 0.5); }
+      .vault__row-icon { font-size: 18px; text-align: center; }
+      .vault__row-name {
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        color: #1c1a17;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .vault__row-meta {
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        color: #8a8479;
+        white-space: nowrap;
+      }
+      .vault__row-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .vault__row-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        color: #8a8479;
+        padding: 4px;
+        text-decoration: none;
+        transition: color 0.15s;
+      }
+      .vault__row-btn:hover { color: #1c1a17; }
+      .vault__row-btn--del:hover { color: #b4543e; }
+      .vault__empty {
+        font-family: 'Fraunces', serif;
+        font-style: italic;
+        font-size: 16px;
+        color: #8a8479;
+        text-align: center;
+        padding: 48px 0;
+      }
+      .vault__modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 300;
+        background: rgba(28, 26, 23, 0.4);
+        align-items: center;
+        justify-content: center;
+      }
+      .vault__modal.is-open { display: flex; }
+      .vault__modal-card {
+        background: #fbf8f3;
+        border: 1px solid #e8e1d2;
+        border-radius: 4px;
+        padding: 32px;
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+      }
+      .vault__modal-text {
+        font-family: 'Fraunces', serif;
+        font-size: 18px;
+        color: #1c1a17;
+        margin-bottom: 24px;
+      }
+      .vault__modal-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+      }
+      .vault__upload-status {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: #1c1a17;
+        color: #fbf8f3;
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        padding: 12px 20px;
+        border-radius: 999px;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: opacity 0.3s, transform 0.3s;
+        pointer-events: none;
+      }
+      .vault__upload-status.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      @media (max-width: 768px) {
+        .vault { padding: 20px 16px; }
+        .vault__header { flex-direction: column; align-items: flex-start; gap: 12px; }
+        .vault__actions { flex-direction: column; align-items: stretch; }
+        .vault__search-wrap { min-width: auto; }
+        .vault__row {
+          grid-template-columns: 28px 1fr auto;
+          gap: 8px;
+          padding: 12px 4px;
+        }
+        .vault__row-meta { display: none; }
+        .vault__dropzone { display: none; }
+      }
+    </style>
+  </body>
+</html>
