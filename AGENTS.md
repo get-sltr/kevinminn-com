@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
 
 ## Commands
 
@@ -62,4 +62,4 @@ Fonts: **Fraunces** (serif, weights 300/400/500) for display, **Inter** (sans, w
 
 ## Deployment
 
-Cloudflare Pages, connected to GitHub repo `kevinminn/kevinminn-com`. Build command: `npm run build`, output: `dist/`, Node 22.16.0. Domain: `kevinminn.com`. DNS is on Cloudflare via Porkbun.
+Cloudflare Pages, connected to GitHub repo `kevinminn/kevinminn-com`. Build command: `npm run build`, output: `dist/`, Node 20. Domain: `kevinminn.com`. DNS is on Cloudflare via Porkbun.

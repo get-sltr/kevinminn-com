@@ -91,7 +91,7 @@ Fonts:
    - **Framework preset:** Astro
    - **Build command:** `npm run build`
    - **Build output directory:** `dist`
-   - **Node version:** 20
+   - **Node version:** 22.16.0
 5. Save and deploy.
 6. Cloudflare → **Pages** → project → **Custom domains** → add `kevinminn.com` and `www.kevinminn.com`. Cloudflare auto-issues TLS via Universal SSL.
 

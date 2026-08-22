@@ -69,12 +69,33 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
         const interstitial = document.getElementById('interstitial');
         if (!interstitial) return;
 
-        const SEEN_KEY = 'interstitial-seen';
+        const SEEN_KEY = 'kevinminn-interstitial-seen';
         const fill = interstitial.querySelector('[data-fill]') as HTMLElement | null;
         let pendingHref: string | null = null;
         let dismissTimer: ReturnType<typeof setTimeout> | null = null;
+        let seenFallback = false;
+
+        const normalizePath = (path: string) => path.replace(/\/$/, '') || '/';
+
+        const hasSeenInterstitial = () => {
+          try {
+            return window.localStorage.getItem(SEEN_KEY) === '1';
+          } catch {
+            return seenFallback;
+          }
+        };
+
+        const markInterstitialSeen = () => {
+          seenFallback = true;
+          try {
+            window.localStorage.setItem(SEEN_KEY, '1');
+          } catch {
+            /* localStorage can be unavailable in strict privacy modes. */
+          }
+        };
 
         const show = (href: string) => {
+          markInterstitialSeen();
           pendingHref = href;
           interstitial.classList.add('is-active');
           if (fill) {
@@ -92,7 +113,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
         const dismiss = () => {
           if (dismissTimer) clearTimeout(dismissTimer);
           interstitial.classList.remove('is-active');
-          sessionStorage.setItem(SEEN_KEY, '1');
           if (pendingHref) {
             setTimeout(() => {
               if (pendingHref) window.location.href = pendingHref;
@@ -102,13 +122,27 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 
         document.querySelectorAll<HTMLAnchorElement>('[data-interstitial-link]').forEach((link) => {
           link.addEventListener('click', (e) => {
+            if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+            if (link.target && link.target !== '_self') return;
+
             const href = link.getAttribute('href');
-            if (!href || href === window.location.pathname) return;
+            if (!href) return;
+
+            const targetUrl = new URL(href, window.location.href);
+            if (targetUrl.origin !== window.location.origin) return;
+            if (
+              normalizePath(targetUrl.pathname) === normalizePath(window.location.pathname) &&
+              targetUrl.search === window.location.search &&
+              targetUrl.hash === window.location.hash
+            ) {
+              return;
+            }
+
             e.preventDefault();
-            if (sessionStorage.getItem(SEEN_KEY)) {
-              window.location.href = href;
+            if (hasSeenInterstitial()) {
+              window.location.href = targetUrl.href;
             } else {
-              show(href);
+              show(targetUrl.href);
             }
           });
         });
