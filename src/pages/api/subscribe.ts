@@ -11,6 +11,7 @@ export const prerender = false;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_EMAIL_LENGTH = 254;
+const MAX_NAME_LENGTH = 80;
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -24,7 +25,7 @@ export const POST: APIRoute = async ({ request }) => {
   // not at module scope, since it is only populated per request.
   const bucket = (env as unknown as ENV).VAULT_BUCKET;
 
-  let payload: { email?: unknown; website?: unknown };
+  let payload: { name?: unknown; email?: unknown; website?: unknown };
   try {
     payload = await request.json();
   } catch {
@@ -42,14 +43,34 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ error: 'Enter a valid email address.' }, 400);
   }
 
+  const name = typeof payload.name === 'string' ? payload.name.trim().replace(/\s+/g, ' ') : '';
+  if (!name || name.length > MAX_NAME_LENGTH) {
+    return json({ error: 'Enter your name.' }, 400);
+  }
+
   // One object per signup. A single rolling file would need read-modify-write,
   // and two people submitting at once would silently lose one of the addresses.
+  //
+  // The key is the address itself, not a uuid, so the vault listing is readable
+  // at a glance. It also dedupes for free: someone signing up twice updates
+  // their record instead of leaving two rows you have to open to tell apart.
   const now = new Date().toISOString();
-  const key = `signups/${now}-${crypto.randomUUID()}.json`;
+  const slugify = (value: string, max: number) =>
+    value
+      .toLowerCase()
+      .replace(/@/g, '-at-')
+      .replace(/[^a-z0-9._-]/g, '-')
+      .replace(/-{2,}/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, max);
+
+  // Name first so the vault listing reads as a list of people, not of strings.
+  const key = `signups/${slugify(name, 60)}__${slugify(email, 90)}.json`;
 
   // Store the consent notice verbatim, not just a boolean. If the wording ever
   // changes, each record still shows what that person was actually shown.
   const record = {
+    name,
     email,
     signedUpAt: now,
     source: 'remember-my-name',
@@ -71,7 +92,7 @@ export const POST: APIRoute = async ({ request }) => {
   let confirmation: string;
   try {
     const key = (env as unknown as ENV).RESEND_API_KEY;
-    const result = await sendConfirmation(email, key);
+    const result = await sendConfirmation(email, name, key);
     confirmation = result.sent ? 'sent' : (result.error ?? 'failed');
     // Always log the outcome. Logging only failures hid the case where the key
     // is simply absent, which returns early and looks identical from outside.

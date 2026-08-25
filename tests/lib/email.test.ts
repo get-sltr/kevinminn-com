@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { confirmationHtml, confirmationText, sendConfirmation, FROM, REPLY_TO } from '../../src/lib/email';
+import {
+  confirmationHtml,
+  confirmationText,
+  firstName,
+  sendConfirmation,
+  FROM,
+  REPLY_TO,
+} from '../../src/lib/email';
 
 describe('confirmation email', () => {
   it('says thank you and closes with the line', () => {
@@ -34,9 +41,31 @@ describe('confirmation email', () => {
   });
 
   it('reports not_configured instead of throwing when the key is absent', async () => {
-    await expect(sendConfirmation('reader@example.com', undefined)).resolves.toEqual({
+    await expect(sendConfirmation('reader@example.com', 'Ada', undefined)).resolves.toEqual({
       sent: false,
       error: 'not_configured',
     });
+  });
+
+  it('greets by first name only', () => {
+    expect(firstName('Ada Lovelace')).toBe('Ada');
+    expect(confirmationText('Ada Lovelace')).toContain("You're on the list, Ada.");
+    expect(confirmationHtml('Ada Lovelace')).toContain('on the list, Ada.');
+  });
+
+  it('falls back cleanly when no name is given', () => {
+    expect(confirmationText()).toContain("You're on the list.");
+    expect(confirmationText('')).not.toContain(', .');
+    expect(confirmationHtml()).toContain('on the list.');
+  });
+
+  it('escapes the name, since it is visitor input landing in HTML', () => {
+    const html = confirmationHtml('<script>alert(1)</script>');
+    expect(html).not.toContain('<script>alert(1)</script>');
+    expect(html).toContain('&lt;script&gt;');
+  });
+
+  it('caps an absurdly long name so it cannot wreck the layout', () => {
+    expect(firstName('A'.repeat(300)).length).toBe(40);
   });
 });

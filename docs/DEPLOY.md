@@ -127,7 +127,9 @@ R2 bucket `km-v`, one bucket for everything:
 
 - Vault files: arbitrary keys, with zero-byte `<path>/.folder` markers standing in
   for directories, since R2 has no real ones
-- Book signups: `signups/<iso-timestamp>-<uuid>.json`, one object per signup
+- Book signups: `signups/<name>__<email>.json`, one object per person. The key carries
+  the identity so the vault listing is readable without opening each file, and a repeat
+  signup updates that person's record rather than adding a second unreadable row.
 
 One object per signup is deliberate. A single rolling list would need
 read-modify-write, and two simultaneous submissions would silently lose an address.

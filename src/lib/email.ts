@@ -13,11 +13,28 @@ const THANKS = 'Thank you for your support. The next time you hear from me, the 
 // Kevin's line, used as written.
 const CLOSING = 'Always be the best authentic version of yourself. Be bold. Be relentless. Be you.';
 
-export function confirmationText(): string {
+/** First name only, trimmed to something that cannot wreck the layout. */
+export function firstName(name: string | undefined): string {
+  const first = (name ?? '').trim().split(/\s+/)[0] ?? '';
+  return first.slice(0, 40);
+}
+
+/** The name is visitor input going into an HTML email. It must be escaped. */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+export function confirmationText(name?: string): string {
+  const who = firstName(name);
   return [
     'REMEMBER MY NAME',
     '',
-    "You're on the list.",
+    who ? `You're on the list, ${who}.` : "You're on the list.",
     '',
     THANKS,
     '',
@@ -32,7 +49,11 @@ export function confirmationText(): string {
   ].join('\n');
 }
 
-export function confirmationHtml(): string {
+export function confirmationHtml(name?: string): string {
+  const who = firstName(name);
+  const greeting = who
+    ? `You&rsquo;re on the list, ${escapeHtml(who)}.`
+    : 'You&rsquo;re on the list.';
   // Inline styles only, and no external assets. Mail clients strip stylesheets
   // and most block remote images by default.
   return `<div style="margin:0;padding:32px 16px;background:#f4efe6;">
@@ -41,7 +62,7 @@ export function confirmationHtml(): string {
       Remember My Name
     </div>
     <p style="margin:24px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:26px;line-height:1.25;color:#1c1a17;">
-      You&rsquo;re on the list.
+      ${greeting}
     </p>
     <p style="margin:16px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:18px;line-height:1.55;color:#4a453d;">
       ${THANKS}
@@ -63,7 +84,11 @@ export function confirmationHtml(): string {
 
 export type SendResult = { sent: boolean; error?: string };
 
-export async function sendConfirmation(to: string, apiKey?: string): Promise<SendResult> {
+export async function sendConfirmation(
+  to: string,
+  name?: string,
+  apiKey?: string
+): Promise<SendResult> {
   if (!apiKey) return { sent: false, error: 'not_configured' };
 
   const res = await fetch('https://api.resend.com/emails', {
@@ -77,8 +102,8 @@ export async function sendConfirmation(to: string, apiKey?: string): Promise<Sen
       to,
       reply_to: REPLY_TO,
       subject: SUBJECT,
-      html: confirmationHtml(),
-      text: confirmationText(),
+      html: confirmationHtml(name),
+      text: confirmationText(name),
     }),
     // Bound the call so a hanging mail API cannot stall the request.
     signal: AbortSignal.timeout(5000),

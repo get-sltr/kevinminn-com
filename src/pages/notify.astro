@@ -29,6 +29,15 @@ import { CONSENT_TEXT } from '../lib/consent';
         <p class="lp">One letter when there is news. No funnel, no spam, no other plans.</p>
 
         <form id="notify-form" novalidate>
+          <label class="sr-only" for="notify-name">Your name</label>
+          <input
+            id="notify-name"
+            name="name"
+            type="text"
+            placeholder="Your name"
+            autocomplete="name"
+            required
+          />
           <label class="sr-only" for="notify-email">Email address</label>
           <input
             id="notify-email"
@@ -153,10 +162,12 @@ import { CONSENT_TEXT } from '../lib/consent';
 
   form {
     display: flex;
+    flex-direction: column;
     gap: 10px;
   }
-  input[type='email'] {
-    flex: 1;
+  input[type='email'],
+  input[type='text'] {
+    width: 100%;
     font-family: 'Inter', sans-serif;
     font-size: 14px;
     color: #1c1a17;
@@ -166,10 +177,12 @@ import { CONSENT_TEXT } from '../lib/consent';
     padding: 12px 14px;
     outline: none;
   }
-  input[type='email']:focus {
+  input[type='email']:focus,
+  input[type='text']:focus {
     border-color: #b4543e;
   }
-  input[type='email']::placeholder {
+  input[type='email']::placeholder,
+  input[type='text']::placeholder {
     color: #8a8479;
   }
   button {
@@ -244,8 +257,8 @@ import { CONSENT_TEXT } from '../lib/consent';
     .page {
       padding: 100px 22px 70px;
     }
-    form {
-      flex-direction: column;
+    button {
+      width: 100%;
     }
   }
 </style>
@@ -261,10 +274,17 @@ import { CONSENT_TEXT } from '../lib/consent';
       e.preventDefault();
 
       const data = new FormData(form);
+      const name = String(data.get('name') ?? '').trim();
       const email = String(data.get('email') ?? '').trim();
       const website = String(data.get('website') ?? '');
 
       statusEl.classList.remove('is-error');
+
+      if (!name) {
+        statusEl.textContent = 'Enter your name.';
+        statusEl.classList.add('is-error');
+        return;
+      }
 
       if (!email) {
         statusEl.textContent = 'Enter an email address.';
@@ -279,7 +299,7 @@ import { CONSENT_TEXT } from '../lib/consent';
         const res = await fetch('/api/subscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, website }),
+          body: JSON.stringify({ name, email, website }),
         });
         const body = (await res.json()) as { ok?: boolean; error?: string };
 
