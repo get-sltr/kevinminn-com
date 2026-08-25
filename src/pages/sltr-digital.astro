@@ -1,0 +1,546 @@
+---
+import Base from '../layouts/Base.astro';
+import Footer from '../components/Footer.astro';
+
+const studioApps = [
+  {
+    name: 'Nourished by Mira',
+    status: 'App Store',
+    image: '/assets/ventures/nourished-logo.png',
+    alt: 'Nourished by Mira product mark',
+    href: 'https://apps.apple.com/us/app/id6761938171',
+    hrefLabel: 'View on App Store',
+    copy:
+      'An iOS nutrition coach for losing fat while keeping muscle. Protein-first meal plans, body composition tracking, and portions that adapt around GLP-1 medication cycles.',
+  },
+  {
+    name: 'DriftLab HQ',
+    status: 'Beta soon',
+    image: '/assets/ventures/driftlabhq-logo.jpg',
+    alt: 'DriftLab HQ product mark',
+    triad: ['Inspired', 'Intelligent', 'Interactive'],
+    signup: true,
+  },
+];
+---
+
+<Base
+  activePage="sltr"
+  title="SLTR Digital Studio - Kevin Minn"
+  description="Small, focused products built for people whose everyday needs are often overlooked by generic software."
+>
+  <main class="page">
+    <section class="hero">
+      <div class="eyebrow">Independent apps</div>
+      <h1>SLTR Digital <em>Studio.</em></h1>
+      <p class="lede">
+        Small, focused products built for people whose everyday needs are often overlooked by
+        generic software.
+      </p>
+      <a
+        href="https://sltrdigitalstudio.com"
+        class="section-link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Visit SLTR Digital Studio
+      </a>
+    </section>
+
+    <section class="venture-section" aria-labelledby="sltr-heading">
+      <h2 id="sltr-heading" class="sr-only">Studio products</h2>
+
+      <div class="app-grid">
+        {
+          studioApps.map((app) => (
+            <article class="app-card">
+              <div class="app-mark">
+                <img src={app.image} alt={app.alt} loading="lazy" />
+              </div>
+              <div class="app-copy">
+                <div class="app-meta">{app.status}</div>
+                <h3>{app.name}</h3>
+                {
+                  app.triad ? (
+                    <p class="app-triad">
+                      {app.triad.map((word, i) => (
+                        <Fragment>
+                          {i > 0 && <span class="sep">|</span>}
+                          {word}
+                        </Fragment>
+                      ))}
+                    </p>
+                  ) : (
+                    <p>{app.copy}</p>
+                  )
+                }
+                {
+                  app.href && (
+                    <a href={app.href} class="app-link" target="_blank" rel="noopener noreferrer">
+                      {app.hrefLabel}
+                    </a>
+                  )
+                }
+                {
+                  app.signup && (
+                    <form class="signup-form" id="driftlab-signup">
+                      <label class="sr-only" for="driftlab-email">
+                        Email for DriftLab HQ beta signup
+                      </label>
+                      <input
+                        id="driftlab-email"
+                        name="email"
+                        type="email"
+                        placeholder="your@email.com"
+                        autocomplete="email"
+                        required
+                      />
+                      <button type="submit">Join beta</button>
+                    </form>
+                  )
+                }
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <a href="/" class="back" data-interstitial-link>&larr; Back to welcome</a>
+    <Footer />
+  </main>
+</Base>
+
+<style>
+  .sr-only {
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+    position: absolute;
+  }
+  .page {
+    padding: 140px 80px 40px;
+    min-height: 100vh;
+  }
+  .hero {
+    max-width: 760px;
+    margin-bottom: 88px;
+  }
+  .eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.24em;
+    color: #b4543e;
+    margin-bottom: 28px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 28px;
+    height: 1px;
+    background: #b4543e;
+  }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(48px, 6vw, 88px);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    color: #1c1a17;
+    margin-bottom: 32px;
+  }
+  h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: #b4543e;
+  }
+  .lede {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(18px, 1.4vw, 21px);
+    line-height: 1.55;
+    color: #4a453d;
+    max-width: 620px;
+  }
+  .venture-section {
+    border-top: 1px solid #e8e1d2;
+    padding: 48px 0 72px;
+  }
+  .vindicara {
+    min-height: 100vh;
+    padding-top: 96px;
+    margin-top: 120px;
+  }
+  .section-kicker,
+  .app-meta {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .section-kicker {
+    color: #b4543e;
+    margin-bottom: 18px;
+  }
+  .section-heading {
+    display: grid;
+    grid-template-columns: minmax(220px, 0.7fr) minmax(280px, 1fr);
+    gap: 64px;
+    align-items: start;
+    margin-bottom: 34px;
+  }
+  .vindicara .section-heading {
+    grid-template-columns: minmax(260px, 0.7fr) minmax(360px, 1fr);
+    padding: 40px 0 48px;
+    border-top: 1px solid #1c1a17;
+    border-bottom: 1px solid #e8e1d2;
+  }
+  .vindicara h2 {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(34px, 4vw, 56px);
+    line-height: 1.05;
+    color: #1c1a17;
+    letter-spacing: -0.03em;
+  }
+  .section-heading p,
+  .app-copy p,
+  .project-copy p {
+    color: #4a453d;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+  }
+  .app-copy .app-triad {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 10px;
+    font-family: 'Fraunces', serif;
+    font-size: 19px;
+    font-weight: 400;
+    color: #1c1a17;
+    line-height: 1.5;
+  }
+  .app-triad .sep {
+    color: #b4543e;
+    font-weight: 300;
+  }
+
+  .app-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+    gap: 1px;
+    background: #e8e1d2;
+    border: 1px solid #e8e1d2;
+  }
+  .app-card {
+    background: #fbf8f3;
+    min-height: 100%;
+  }
+  .app-mark {
+    aspect-ratio: 1;
+    background: #f4efe6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .app-mark img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .app-copy,
+  .project-copy {
+    padding: 28px;
+  }
+  .app-meta {
+    color: #8a8479;
+    margin-bottom: 14px;
+  }
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 1.1;
+    color: #1c1a17;
+    letter-spacing: -0.02em;
+    margin-bottom: 14px;
+  }
+  .app-link {
+    display: inline-flex;
+    margin-top: 18px;
+    color: #b4543e;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .app-link:hover {
+    color: #1c1a17;
+  }
+  .section-link {
+    display: inline-flex;
+    margin-top: 18px;
+    color: #b4543e;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .section-link:hover {
+    color: #1c1a17;
+  }
+  .signup-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+    margin-top: 22px;
+  }
+  .signup-form input,
+  .signup-form button {
+    height: 42px;
+    border: 1px solid #e8e1d2;
+    background: #fbf8f3;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+  }
+  .signup-form input {
+    min-width: 0;
+    padding: 0 12px;
+    color: #1c1a17;
+  }
+  .signup-form button {
+    padding: 0 16px;
+    color: #fbf8f3;
+    background: #1c1a17;
+    border-color: #1c1a17;
+    cursor: pointer;
+  }
+  .signup-form button:hover {
+    background: #b4543e;
+    border-color: #b4543e;
+  }
+  .project-stack {
+    display: grid;
+    gap: 16px;
+  }
+  .programs {
+    margin-top: 72px;
+    padding-top: 8px;
+  }
+  .program-list {
+    list-style: none;
+    margin: 24px 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px 32px;
+  }
+  .program-list li {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(15px, 1.35vw, 19px);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: #1c1a17;
+  }
+
+  .product-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #8a8479;
+    margin: 44px 0 16px;
+  }
+  .project-card {
+    border: 1px solid #e8e1d2;
+    background: #fbf8f3;
+  }
+  .project-card--featured {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.85fr) minmax(320px, 1fr);
+    align-items: stretch;
+  }
+  .project-visual {
+    background: transparent;
+    min-height: 240px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .project-visual img {
+    width: 28%;
+    height: 28%;
+    object-fit: contain;
+  }
+  .project-card h3 {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .project-copy .fine-note {
+    margin-top: 16px;
+    color: #8a8479;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .air-red {
+    color: #e63946;
+    font-style: normal;
+  }
+  .back {
+    display: inline-flex;
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid #e8e1d2;
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #4a453d;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .back:hover {
+    color: #b4543e;
+  }
+  @media (max-width: 720px) {
+    .program-list {
+      justify-content: flex-start;
+      gap: 14px 24px;
+    }
+  }
+  @media (max-width: 980px) {
+    .page {
+      padding: 100px 32px 32px;
+    }
+    .section-heading,
+    .project-card--featured {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    .app-grid {
+      grid-template-columns: 1fr;
+    }
+    .project-visual {
+      min-height: 220px;
+    }
+  }
+  @media (max-width: 768px) {
+    .page {
+      padding: 88px 20px 24px;
+    }
+    .hero {
+      margin-bottom: 64px;
+    }
+    h1 {
+      font-size: clamp(36px, 10vw, 56px);
+    }
+    .lede {
+      font-size: 16px;
+    }
+    .venture-section {
+      padding: 40px 0 56px;
+    }
+    .app-copy,
+    .project-copy {
+      padding: 22px;
+    }
+    h3 {
+      font-size: 26px;
+    }
+    .signup-form {
+      grid-template-columns: 1fr;
+    }
+  }
+  /* ===== CENTRED LAYOUT ===== */
+  .hero,
+  .section-heading,
+  .app-grid,
+  .project-stack,
+  .programs {
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero,
+  .section-kicker,
+  .product-label {
+    text-align: center;
+  }
+  .hero .lede {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .section-heading,
+  .vindicara .section-heading {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    gap: 18px;
+  }
+  .section-heading p {
+    max-width: 100%;
+  }
+  .eyebrow {
+    justify-content: center;
+  }
+  /* Card interiors stay left aligned. Centred body copy is hard to read. */
+  .app-copy,
+  .project-copy {
+    text-align: left;
+  }
+  .project-card--featured {
+    grid-template-columns: 1fr;
+  }
+  .project-visual {
+    min-height: 200px;
+  }
+  .program-list {
+    justify-content: center;
+  }
+  .back {
+    justify-content: center;
+    text-align: center;
+  }
+
+</style>
+
+<script>
+  const driftForm = document.getElementById('driftlab-signup');
+  driftForm?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const data = new FormData(driftForm);
+    const email = String(data.get('email') ?? '').trim();
+    const subject = encodeURIComponent('DriftLab HQ beta signup');
+    const body = encodeURIComponent(
+      `Email: ${email}\n\nI would like early access to DriftLab HQ.`
+    );
+    window.location.href = `mailto:info@kevinminn.com?subject=${subject}&body=${body}`;
+  });
+</script>

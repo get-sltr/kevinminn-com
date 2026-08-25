@@ -4,6 +4,7 @@ type ENV = {
   VAULT_BUCKET: R2Bucket;
   VAULT_PASSWORD: string;
   VAULT_SECRET: string;
+  RESEND_API_KEY?: string;
 };
 
 type Runtime = import('@astrojs/cloudflare').Runtime<ENV>;

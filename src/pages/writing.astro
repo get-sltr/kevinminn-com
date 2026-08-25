@@ -6,12 +6,12 @@ import Footer from '../components/Footer.astro';
 <Base
   activePage="writing"
   title="Writing — Kevin Minn"
-  description="A passage from the prologue of Remember My Name — a memoir, forthcoming."
+  description="A passage from the prologue of Remember My Name, a memoir releasing this fall."
 >
   <!-- Intro framing -->
   <section class="intro">
     <div class="intro-inner">
-      <div class="eyebrow">A memoir, forthcoming</div>
+      <div class="eyebrow">A memoir, this fall</div>
       <h1>Remember <em>My Name.</em></h1>
       <p class="sub">A passage from the prologue. Set as it will appear on the page.</p>
       <div class="cue">
@@ -64,24 +64,67 @@ import Footer from '../components/Footer.astro';
   <!-- After the book page -->
   <section class="after">
     <div class="after-inner">
+      <div class="covers">
+        <figure>
+          <button
+            type="button"
+            class="cover-btn"
+            data-cover="/assets/bookcover6.png"
+            data-alt="Front cover of Remember My Name"
+          >
+            <img src="/assets/bookcover6.png" alt="Front cover of Remember My Name" loading="lazy" />
+            <span class="sr-only">Enlarge the front cover</span>
+          </button>
+          <figcaption>Front</figcaption>
+        </figure>
+        <figure>
+          <button
+            type="button"
+            class="cover-btn"
+            data-cover="/assets/backcover2.png"
+            data-alt="Back cover of Remember My Name, including the description and author note"
+          >
+            <img src="/assets/backcover2.png" alt="Back cover of Remember My Name" loading="lazy" />
+            <span class="sr-only">Enlarge the back cover to read it</span>
+          </button>
+          <figcaption>Back &middot; tap to read</figcaption>
+        </figure>
+      </div>
+
       <div class="h">About the book</div>
       <h3 class="ttl">Remember <em>My Name.</em></h3>
       <p class="ttl-sub">A memoir of survival, identity, and the long act of becoming.</p>
 
-      <p class="submission-line"><em>In submission. Representation: querying.</em></p>
+      <div class="blurb">
+        <p>He learned to survive by making himself smaller.</p>
+        <p>
+          Leaving Burma gave him the chance to become someone else, until the life he built at
+          thirty-five thousand feet forced him to choose between losing everything and finally
+          living in the open.
+        </p>
+      </div>
+
+      <p class="submission-line"><em>Releasing this fall.</em></p>
 
       <div class="signup">
-        <p class="lh">Hear when the book finds a home.</p>
-        <p class="lp">One letter, when there&rsquo;s news. No funnel, no spam, no other plans.</p>
-        <form id="writing-signup">
-          <input type="email" placeholder="your@email.com" required aria-label="Email address" />
-          <button type="submit">Notify me</button>
-        </form>
+        <p class="lh">Hear the release date first.</p>
+        <p class="lp">One letter when there is news. No funnel, no spam, no other plans.</p>
+        <a class="signup-cta" href="/notify">Notify me</a>
       </div>
     </div>
   </section>
 
   <Footer />
+
+  <dialog class="lightbox" id="lightbox" aria-label="Book cover">
+    <button type="button" class="lightbox__close" id="lightbox-close" aria-label="Close">
+      &times;
+    </button>
+    <div class="lightbox__stage" id="lightbox-stage">
+      <img id="lightbox-img" src="" alt="" />
+    </div>
+    <p class="lightbox__hint" id="lightbox-hint">Click the cover to zoom in</p>
+  </dialog>
 </Base>
 
 <style>
@@ -317,10 +360,160 @@ import Footer from '../components/Footer.astro';
     z-index: 1;
   }
   .after-inner {
-    max-width: 620px;
+    max-width: 760px;
     margin: 0 auto;
     text-align: center;
   }
+  .covers {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 48px;
+  }
+  .covers figure {
+    flex: 0 1 260px;
+    margin: 0;
+  }
+  .cover-btn {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+    border-radius: 2px;
+    transition: transform 0.25s ease;
+  }
+  .cover-btn:hover,
+  .cover-btn:focus-visible {
+    transform: translateY(-3px);
+  }
+  .cover-btn:focus-visible {
+    outline: 2px solid #b4543e;
+    outline-offset: 4px;
+  }
+  .covers img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 2px;
+    border: 1px solid #e8e1d2;
+    box-shadow:
+      0 1px 3px rgba(28, 26, 23, 0.16),
+      0 12px 28px rgba(28, 26, 23, 0.14);
+  }
+
+  /* ===== COVER LIGHTBOX ===== */
+  .lightbox {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: hidden;
+  }
+  .lightbox::backdrop {
+    background: rgba(20, 18, 15, 0.94);
+  }
+  .lightbox__stage {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    /* Momentum scrolling matters here: zoomed, this is how people read the back */
+    -webkit-overflow-scrolling: touch;
+  }
+  .lightbox__stage img {
+    display: block;
+    max-width: calc(100vw - 48px);
+    max-height: calc(100dvh - 48px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    cursor: zoom-in;
+    border-radius: 2px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6);
+  }
+  /* Zoomed: render at native width so the small print is actually legible,
+     and let the stage scroll in both directions. */
+  .lightbox.is-zoomed .lightbox__stage {
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+  .lightbox.is-zoomed .lightbox__stage img {
+    max-width: none;
+    max-height: none;
+    width: 992px;
+    cursor: zoom-out;
+    margin: auto;
+  }
+  .lightbox__close {
+    position: fixed;
+    top: 14px;
+    right: 18px;
+    z-index: 2;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(251, 248, 243, 0.12);
+    color: #fbf8f3;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .lightbox__close:hover,
+  .lightbox__close:focus-visible {
+    background: rgba(251, 248, 243, 0.26);
+  }
+  .lightbox__hint {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 16px;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(251, 248, 243, 0.66);
+    pointer-events: none;
+  }
+  @media (max-width: 560px) {
+    .lightbox__stage {
+      padding: 12px;
+    }
+    .lightbox__stage img {
+      max-width: calc(100vw - 24px);
+      max-height: calc(100dvh - 24px);
+    }
+  }
+  .covers figcaption {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: #8a8479;
+    margin-top: 12px;
+  }
+  @media (max-width: 560px) {
+    .covers {
+      gap: 16px;
+    }
+    .covers figure {
+      flex: 0 1 45%;
+    }
+  }
+
   .h {
     font-family: 'Inter', sans-serif;
     font-size: 10px;
@@ -351,6 +544,27 @@ import Footer from '../components/Footer.astro';
     color: #4a453d;
     margin-bottom: 24px;
   }
+  .blurb {
+    max-width: 760px;
+    margin: 0 auto 28px;
+  }
+  .blurb p {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 19px;
+    line-height: 1.6;
+    color: #1c1a17;
+    letter-spacing: -0.005em;
+    text-wrap: pretty;
+  }
+  .blurb p + p {
+    margin-top: 14px;
+  }
+  .blurb em {
+    font-style: italic;
+    color: #b4543e;
+  }
+
   .submission-line {
     font-family: 'Fraunces', serif;
     font-size: 16px;
@@ -363,6 +577,8 @@ import Footer from '../components/Footer.astro';
   }
 
   .signup {
+    max-width: 620px;
+    margin: 0 auto;
     background: #fbf8f3;
     padding: 36px 32px;
     border-radius: 4px;
@@ -385,42 +601,20 @@ import Footer from '../components/Footer.astro';
     margin-bottom: 20px;
     line-height: 1.55;
   }
-  .signup form {
-    display: flex;
-    gap: 8px;
-  }
-  .signup input {
-    flex: 1;
-    padding: 12px 16px;
-    border: 1px solid #e8e1d2;
-    background: #f4efe6;
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    color: #1c1a17;
-    border-radius: 999px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .signup input:focus {
-    border-color: #b4543e;
-  }
-  .signup input::placeholder {
-    color: #8a8479;
-  }
-  .signup button {
+  .signup-cta {
+    display: inline-block;
     background: #1c1a17;
     color: #fbf8f3;
-    border: 0;
-    padding: 12px 20px;
+    text-decoration: none;
+    padding: 12px 24px;
     font-family: 'Inter', sans-serif;
     font-size: 12px;
     font-weight: 500;
     letter-spacing: 0.05em;
     border-radius: 999px;
-    cursor: pointer;
     transition: background 0.2s;
   }
-  .signup button:hover {
+  .signup-cta:hover {
     background: #b4543e;
   }
 
@@ -437,25 +631,62 @@ import Footer from '../components/Footer.astro';
     .prose {
       font-size: 16px;
     }
-    .signup form {
-      flex-direction: column;
+    .signup-cta {
+      display: block;
+      text-align: center;
     }
   }
 </style>
 
 <script>
-  // Newsletter signup placeholder. Replace with real handler (Buttondown / Substack / etc.)
-  // when ready. For now, intercept and show a confirmation so the page doesn't reload.
-  const form = document.getElementById('writing-signup') as HTMLFormElement | null;
-  if (form) {
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const input = form.querySelector('input[type="email"]') as HTMLInputElement | null;
-      if (input?.value) {
-        console.log('Newsletter signup pending real handler. Submitted email:', input.value);
-        form.innerHTML =
-          '<p style="font-family:Fraunces,serif;font-style:italic;color:#4a453d;font-size:16px;">Thank you. You will hear from me.</p>';
+  // Cover lightbox. Uses a native <dialog> with showModal(), which gives Escape
+  // handling, focus trapping, and an inert background without any library.
+  const lightbox = document.getElementById('lightbox') as HTMLDialogElement | null;
+  const stage = document.getElementById('lightbox-stage');
+  const image = document.getElementById('lightbox-img') as HTMLImageElement | null;
+  const hint = document.getElementById('lightbox-hint');
+  const closeBtn = document.getElementById('lightbox-close');
+
+  if (lightbox && stage && image && hint && closeBtn) {
+    const setZoom = (on: boolean) => {
+      lightbox.classList.toggle('is-zoomed', on);
+      hint.textContent = on ? 'Click the cover to zoom out' : 'Click the cover to zoom in';
+      if (on) {
+        // Start centred horizontally rather than at the left edge.
+        stage.scrollLeft = (stage.scrollWidth - stage.clientWidth) / 2;
+        stage.scrollTop = 0;
       }
+    };
+
+    const close = () => {
+      lightbox.close();
+    };
+
+    document.querySelectorAll<HTMLButtonElement>('.cover-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const src = btn.dataset.cover;
+        if (!src) return;
+        image.src = src;
+        image.alt = btn.dataset.alt || '';
+        setZoom(false);
+        lightbox.showModal();
+      });
+    });
+
+    image.addEventListener('click', () => {
+      setZoom(!lightbox.classList.contains('is-zoomed'));
+    });
+
+    closeBtn.addEventListener('click', close);
+
+    // Clicking the surrounding area closes, but clicking the cover must not.
+    stage.addEventListener('click', (e) => {
+      if (e.target === stage) close();
+    });
+
+    // Reset zoom on close so the next open starts fit-to-screen.
+    lightbox.addEventListener('close', () => {
+      setZoom(false);
     });
   }
 </script>

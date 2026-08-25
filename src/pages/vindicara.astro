@@ -2,36 +2,6 @@
 import Base from '../layouts/Base.astro';
 import Footer from '../components/Footer.astro';
 
-const studioApps = [
-  {
-    name: 'Primal',
-    status: 'Web app',
-    image: '/assets/ventures/primal-logo.png',
-    alt: 'Primal product mark',
-    copy:
-      'A private social web app for gay men, built around direct connection, discovery, and intent.',
-  },
-  {
-    name: 'MemoryAisle',
-    status: 'App Store',
-    image: '/assets/ventures/memoryaisle-logo.png',
-    alt: 'MemoryAisle product mark',
-    href: 'https://apps.apple.com/us/app/memoryaisle-glp-1-nutrition/id6761938171',
-    hrefLabel: 'View on App Store',
-    copy:
-      'A GLP-1 nutrition coach for steadier meals, clearer tracking, and support that fits real life.',
-  },
-  {
-    name: 'DriftLab HQ',
-    status: 'Beta soon',
-    image: '/assets/ventures/driftlab-logo.png',
-    alt: 'DriftLab HQ product mark',
-    copy:
-      'A calm operating space for ideas, notes, projects, and systems. Built for people who need one place to think clearly, shape work, and keep momentum visible.',
-    signup: true,
-  },
-];
-
 const vindicaraProjects = [
   {
     name: 'PROJECT',
@@ -42,104 +12,52 @@ const vindicaraProjects = [
     href: 'https://vindicara.io/get-started/',
     hrefLabel: 'Start with Project AIR',
     copy:
-      'Project AIR is the answer: an evidence layer for AI agents that monitors sensitive actions, enforces human authority, and creates a signed, court-supportable record. No agent is autonomous. Every action traces back to a named human. Every agent action, proven.',
+      'Project AIR is the accountability layer for AI agents. It detects sensitive actions, verifies and explains them, contains what should not proceed, and turns every decision into a signed, independently verifiable record that traces back to a named human. No agent is autonomous. It ships as an open source SDK and CLI, with hosted and enterprise builds for teams that need audit readiness. Every agent action, proven.',
   },
   {
     name: 'AXIISIUM',
     status: 'Oncology AI',
     image: '/assets/ventures/axiisium-logo.png',
     alt: 'AXIISIUM healthcare AI logo',
+    href: 'https://axiisium.com',
+    hrefLabel: 'Visit Axiisium',
     copy:
-      'Axiisium is early-stage multimodal AI for acute myeloid leukemia, built to read pathology, flow, genetics, and clinical signals together. Its first job is trial enrichment: helping sponsors prioritize who to sequence first, move faster with fewer screening tests, and keep every selection tied to a signed, independently verifiable record. Read the whole patient. Prove every call.',
-    fineNote: 'Axiisium is early and in active development.',
+      'Axiisium is audit-grade AI for acute myeloid leukemia. It classifies cells and flags NPM1 mutations from morphology alone, and where most classifiers hand back a guess, Axiisium returns a signed, independently verifiable record of every call. It runs air-gapped when the lab requires it, so the record holds without patient data ever leaving the building.',
+    fineNote: 'Research use only. Not for diagnostic use. Axiisium is early and in active development.',
+  },
+  {
+    name: 'AMYNEION',
+    status: 'Autoimmune trials',
+    href: 'https://amyneion.com',
+    hrefLabel: 'Visit Amyneion',
+    copy:
+      'Amyneion is the autoimmune trial network where patients already live. Most people with autoimmune conditions are treated in community practices and never hear about the studies they qualify for, which is why trials fill slowly and research populations look nothing like the patients they are meant to serve. Amyneion puts the infrastructure where the care already happens, across community rheumatology, gastroenterology, neurology, and federally qualified health centers: enrollment forecasting before a protocol is locked, a consented and phenotyped registry that persists, and eligibility decided locally so patient data stays where it lives.',
   },
 ];
 ---
 
 <Base
-  activePage="ventures"
-  title="Ventures - Kevin Minn"
-  description="Independent apps through SLTR Digital Studio and healthcare security software through Vindicara."
+  activePage="vindicara"
+  title="Vindicara - Kevin Minn"
+  description="Vindicara builds the system of record for human accountability over AI agents."
 >
-  <main class="page">
+  <main class="page vindicara">
     <section class="hero">
-      <div class="eyebrow">Ventures</div>
-      <h1>The <em>work.</em></h1>
+      <div class="eyebrow">Company</div>
+      <h1>Vin<em>dicara.</em></h1>
       <p class="lede">
-        Two lanes of work: independent apps through SLTR Digital Studio, and healthcare security
-        software through Vindicara.
+        Vindicara builds the system of record for human accountability over AI agents. It began as
+        a runtime security engine for policy enforcement, tool scanning, agent identity, drift
+        detection, and compliance evidence. That work revealed the sharper question: when an agent
+        acts, can you prove what it did and who authorized it?
       </p>
+      <a href="https://vindicara.io/" class="section-link" target="_blank" rel="noopener noreferrer">
+        Visit Vindicara
+      </a>
     </section>
 
-    <section class="venture-section" aria-labelledby="sltr-heading">
-      <div class="section-kicker">Independent apps</div>
-      <div class="section-heading">
-        <h2 id="sltr-heading">SLTR Digital Studio</h2>
-        <p>
-          Small, focused products built for people whose everyday needs are often overlooked by
-          generic software.
-        </p>
-      </div>
-
-      <div class="app-grid">
-        {
-          studioApps.map((app) => (
-            <article class="app-card">
-              <div class="app-mark">
-                <img src={app.image} alt={app.alt} loading="lazy" />
-              </div>
-              <div class="app-copy">
-                <div class="app-meta">{app.status}</div>
-                <h3>{app.name}</h3>
-                <p>{app.copy}</p>
-                {
-                  app.href && (
-                    <a href={app.href} class="app-link" target="_blank" rel="noopener noreferrer">
-                      {app.hrefLabel}
-                    </a>
-                  )
-                }
-                {
-                  app.signup && (
-                    <form class="signup-form" id="driftlab-signup">
-                      <label class="sr-only" for="driftlab-email">
-                        Email for DriftLab HQ beta signup
-                      </label>
-                      <input
-                        id="driftlab-email"
-                        name="email"
-                        type="email"
-                        placeholder="your@email.com"
-                        autocomplete="email"
-                        required
-                      />
-                      <button type="submit">Join beta</button>
-                    </form>
-                  )
-                }
-              </div>
-            </article>
-          ))
-        }
-      </div>
-    </section>
-
-    <section class="venture-section vindicara" aria-labelledby="vindicara-heading">
-      <div class="section-kicker">Company</div>
-      <div class="section-heading">
-        <h2 id="vindicara-heading">Vindicara</h2>
-        <p>
-          Vindicara builds the system of record for human accountability over AI agents. It began
-          as a runtime security engine for policy enforcement, tool scanning, agent identity, drift
-          detection, and compliance evidence. That work revealed the sharper question: when an
-          agent acts, can you prove what it did and who authorized it?
-        </p>
-        <a href="https://vindicara.io/" class="section-link" target="_blank" rel="noopener noreferrer">
-          Visit Vindicara
-        </a>
-      </div>
-
-      <div class="product-label">Vindicara products</div>
+    <section class="venture-section" aria-labelledby="vindicara-heading">
+      <div class="product-label" id="vindicara-heading">Vindicara products</div>
       <div class="project-stack">
         {
           vindicaraProjects.map((project) => (
@@ -173,24 +91,20 @@ const vindicaraProjects = [
       </div>
     </section>
 
+    <section class="programs" aria-labelledby="programs-heading">
+      <div class="section-kicker" id="programs-heading">Programs</div>
+      <ul class="program-list">
+        <li>NVIDIA Inception</li>
+        <li>E2B for Startups</li>
+        <li>Claude for Startups</li>
+        <li>AWS for Startups</li>
+      </ul>
+    </section>
+
     <a href="/" class="back" data-interstitial-link>&larr; Back to welcome</a>
     <Footer />
   </main>
 </Base>
-
-<script>
-  const driftForm = document.getElementById('driftlab-signup');
-  driftForm?.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const data = new FormData(driftForm);
-    const email = String(data.get('email') ?? '').trim();
-    const subject = encodeURIComponent('DriftLab HQ beta signup');
-    const body = encodeURIComponent(
-      `Email: ${email}\n\nI would like early access to DriftLab HQ.`
-    );
-    window.location.href = `mailto:hello@kevinminn.com?subject=${subject}&body=${body}`;
-  });
-</script>
 
 <style>
   .sr-only {
@@ -306,9 +220,28 @@ const vindicaraProjects = [
     font-size: 15px;
     line-height: 1.75;
   }
+  .app-copy .app-triad {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 10px;
+    font-family: 'Fraunces', serif;
+    font-size: 19px;
+    font-weight: 400;
+    color: #1c1a17;
+    line-height: 1.5;
+  }
+  .app-triad .sep {
+    color: #b4543e;
+    font-weight: 300;
+  }
+
   .app-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
     gap: 1px;
     background: #e8e1d2;
     border: 1px solid #e8e1d2;
@@ -326,9 +259,9 @@ const vindicaraProjects = [
     overflow: hidden;
   }
   .app-mark img {
-    width: 52%;
-    height: 52%;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
   .app-copy,
   .project-copy {
@@ -405,6 +338,27 @@ const vindicaraProjects = [
     display: grid;
     gap: 16px;
   }
+  .programs {
+    margin-top: 72px;
+    padding-top: 8px;
+  }
+  .program-list {
+    list-style: none;
+    margin: 24px 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px 32px;
+  }
+  .program-list li {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(15px, 1.35vw, 19px);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: #1c1a17;
+  }
+
   .product-label {
     font-family: 'Inter', sans-serif;
     font-size: 11px;
@@ -456,7 +410,10 @@ const vindicaraProjects = [
   }
   .back {
     display: inline-flex;
-    margin-top: 8px;
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid #e8e1d2;
+    width: 100%;
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 500;
@@ -466,6 +423,12 @@ const vindicaraProjects = [
   }
   .back:hover {
     color: #b4543e;
+  }
+  @media (max-width: 720px) {
+    .program-list {
+      justify-content: flex-start;
+      gap: 14px 24px;
+    }
   }
   @media (max-width: 980px) {
     .page {
@@ -510,4 +473,55 @@ const vindicaraProjects = [
       grid-template-columns: 1fr;
     }
   }
+  /* ===== CENTRED LAYOUT ===== */
+  .hero,
+  .section-heading,
+  .app-grid,
+  .project-stack,
+  .programs {
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero,
+  .section-kicker,
+  .product-label {
+    text-align: center;
+  }
+  .hero .lede {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .section-heading,
+  .vindicara .section-heading {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    gap: 18px;
+  }
+  .section-heading p {
+    max-width: 100%;
+  }
+  .eyebrow {
+    justify-content: center;
+  }
+  /* Card interiors stay left aligned. Centred body copy is hard to read. */
+  .app-copy,
+  .project-copy {
+    text-align: left;
+  }
+  .project-card--featured {
+    grid-template-columns: 1fr;
+  }
+  .project-visual {
+    min-height: 200px;
+  }
+  .program-list {
+    justify-content: center;
+  }
+  .back {
+    justify-content: center;
+    text-align: center;
+  }
+
 </style>

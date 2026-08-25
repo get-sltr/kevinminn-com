@@ -1,11 +1,13 @@
 ---
 const year = new Date().getFullYear();
 
+// Every href here must point somewhere real. A previous list sent LinkedIn to a
+// different Kevin Minn, and GitHub to an account that 404s.
 const social = [
-  { label: 'LinkedIn', href: 'https://linkedin.com/in/kevinminn' },
-  { label: 'GitHub', href: 'https://github.com/kevinminn' },
-  { label: 'Substack', href: '#' },
-  { label: 'Email', href: 'mailto:hello@kevinminn.com' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/kevin-minn' },
+  { label: 'Instagram', href: 'https://www.instagram.com/kevbuilds.ai' },
+  { label: 'Facebook', href: 'https://www.facebook.com/kevinminn' },
+  { label: 'Email', href: 'mailto:info@kevinminn.com' },
 ];
 ---
 
@@ -16,6 +18,16 @@ const social = [
     <span class="foot__signed">made in Los Angeles</span>
   </div>
   <div class="foot__social">
-    {social.map((s) => <a href={s.href}>{s.label}</a>)}
+    {
+      social.map((s) => (
+        <a
+          href={s.href}
+          target={s.href.startsWith('mailto:') ? undefined : '_blank'}
+          rel={s.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
+        >
+          {s.label}
+        </a>
+      ))
+    }
   </div>
 </footer>

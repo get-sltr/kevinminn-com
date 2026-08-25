@@ -1,10 +1,11 @@
 import type { APIRoute } from 'astro';
+import { env } from 'cloudflare:workers';
 import { parseFolderPrefix } from '../../../lib/vault/paths';
 
 export const prerender = false;
 
-export const GET: APIRoute = async ({ url, locals }) => {
-  const bucket = locals.runtime.env.VAULT_BUCKET;
+export const GET: APIRoute = async ({ url }) => {
+  const bucket = (env as unknown as ENV).VAULT_BUCKET;
   const prefix = parseFolderPrefix(url.searchParams.get('prefix') || '');
 
   const listed = await bucket.list({

@@ -1,4 +1,5 @@
 import { defineMiddleware } from 'astro:middleware';
+import { env } from 'cloudflare:workers';
 import { verifyCookie } from './lib/vault/cookie';
 
 const PUBLIC_PATHS = ['/vault/login', '/api/vault/auth'];
@@ -17,7 +18,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     return context.redirect('/vault/login');
   }
 
-  const secret = context.locals.runtime.env.VAULT_SECRET;
+  const secret = (env as unknown as ENV).VAULT_SECRET;
   const value = await verifyCookie(cookie, secret);
   if (!value) {
     context.cookies.delete('vault-session', { path: '/' });

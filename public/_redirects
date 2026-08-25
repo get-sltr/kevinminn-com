@@ -1,3 +1,7 @@
 # Redirects for kevinminn.com
 # Format: /from-path /to-path 301
 # Currently no redirects needed; add them here as the site grows.
+
+# /ventures was split into two pages
+/ventures /sltr-digital 301
+/ventures/ /sltr-digital 301

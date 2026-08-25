@@ -6,5 +6,5 @@ binding = "VAULT_BUCKET"
 bucket_name = "km-v"
 
 [vars]
-# VAULT_PASSWORD and VAULT_SECRET are set in Cloudflare Pages dashboard
+# VAULT_PASSWORD, VAULT_SECRET and RESEND_API_KEY are set in the Cloudflare dashboard
 # Do NOT put real values here

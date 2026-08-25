@@ -1,9 +1,10 @@
 import type { APIRoute } from 'astro';
+import { env } from 'cloudflare:workers';
 import { signCookie } from '../../../lib/vault/cookie';
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ request, cookies, locals }) => {
+export const POST: APIRoute = async ({ request, cookies }) => {
   const form = await request.formData();
   const password = form.get('password');
 
@@ -14,7 +15,7 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
     });
   }
 
-  const expected = locals.runtime.env.VAULT_PASSWORD;
+  const expected = (env as unknown as ENV).VAULT_PASSWORD;
   if (password !== expected) {
     return new Response(JSON.stringify({ error: 'Wrong password' }), {
       status: 401,
@@ -22,7 +23,7 @@ export const POST: APIRoute = async ({ request, cookies, locals }) => {
     });
   }
 
-  const secret = locals.runtime.env.VAULT_SECRET;
+  const secret = (env as unknown as ENV).VAULT_SECRET;
   const token = crypto.randomUUID();
   const signed = await signCookie(token, secret);
 

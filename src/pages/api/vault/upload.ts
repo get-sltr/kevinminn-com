@@ -1,10 +1,11 @@
 import type { APIRoute } from 'astro';
+import { env } from 'cloudflare:workers';
 import { sanitizePath } from '../../../lib/vault/paths';
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ request, locals }) => {
-  const bucket = locals.runtime.env.VAULT_BUCKET;
+export const POST: APIRoute = async ({ request }) => {
+  const bucket = (env as unknown as ENV).VAULT_BUCKET;
   const form = await request.formData();
   const file = form.get('file') as File | null;
   const folder = (form.get('folder') as string) || '';

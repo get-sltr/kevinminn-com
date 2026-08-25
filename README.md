@@ -2,14 +2,15 @@
 
 Personal site for Kevin Minn. Builder, writer, archivist of becoming.
 
-Built with [Astro](https://astro.build) + [Tailwind CSS](https://tailwindcss.com). Deployed on [Cloudflare Pages](https://pages.cloudflare.com).
+Built with [Astro](https://astro.build) + [Tailwind CSS](https://tailwindcss.com). Deployed on [Cloudflare Workers](https://workers.cloudflare.com).
 
 ## Stack
 
-- **Framework:** Astro 5
+- **Framework:** Astro 7
 - **Styling:** Tailwind CSS 3 + scoped component styles
 - **Type system:** TypeScript (strict)
-- **Hosting:** Cloudflare Pages
+- **Tests:** Vitest
+- **Hosting:** Cloudflare Workers (via `@astrojs/cloudflare`), with R2 for storage
 - **Registrar:** Porkbun (DNS pointed at Cloudflare)
 - **Fonts:** Fraunces (display) + Inter (UI), via Google Fonts
 
@@ -22,14 +23,19 @@ npm run dev
 
 Open http://localhost:4321
 
-## Build & preview
+## Build & test
 
 ```bash
 npm run build
-npm run preview
+npm test
 ```
 
-The production bundle lands in `dist/`.
+The build lands in `dist/client` (static assets) and `dist/server` (the worker).
+It is not a flat `dist/`.
+
+Note that `npm run dev` cannot run server-rendered routes (the vault, `/api/*`)
+on the current Astro version. Test those against the built worker instead. See
+[`docs/DEPLOY.md`](./docs/DEPLOY.md).
 
 ## Project structure
 
@@ -37,8 +43,8 @@ The production bundle lands in `dist/`.
 /
 ├── public/
 │   ├── assets/        # static images including portrait.jpg
-│   ├── _headers       # Cloudflare Pages headers (security, caching)
-│   ├── _redirects     # Cloudflare Pages redirects
+│   ├── _headers       # security and caching headers
+│   ├── _redirects     # redirects
 │   ├── favicon.svg    # SVG favicon
 │   └── robots.txt
 ├── src/
@@ -50,14 +56,25 @@ The production bundle lands in `dist/`.
 │   │   └── WelcomeSide.astro     # right half of home
 │   ├── layouts/
 │   │   └── Base.astro            # HTML shell, meta, scripts
+│   ├── lib/
+│   │   ├── consent.ts            # signup consent notice, single source of truth
+│   │   ├── email.ts              # Resend confirmation email
+│   │   └── vault/                # cookie signing, path sanitization
+│   ├── middleware.ts             # auth guard for /vault and /api/vault
 │   ├── pages/
 │   │   ├── index.astro           # home (locked, no scroll)
-│   │   ├── ventures.astro        # stub
-│   │   ├── writing.astro         # stub
-│   │   ├── about.astro           # stub
-│   │   └── contact.astro
+│   │   ├── ventures.astro
+│   │   ├── writing.astro
+│   │   ├── notify.astro          # book release signup
+│   │   ├── about.astro
+│   │   ├── contact.astro
+│   │   ├── api/                  # subscribe + vault endpoints
+│   │   └── vault/                # password-gated file browser
 │   └── styles/
 │       └── global.css            # Tailwind directives, font import, shared components
+├── scripts/postbuild.mjs         # strips legacy_env so wrangler can deploy
+├── tests/                        # vitest
+├── docs/DEPLOY.md                # deployment runbook
 ├── astro.config.mjs
 ├── tailwind.config.mjs
 ├── tsconfig.json
@@ -82,20 +99,18 @@ Fonts:
 - **Fraunces** weights 300 / 400 / 500 (italic enabled)
 - **Inter** weights 400 / 500 / 600
 
-## Deployment (Cloudflare Pages)
+## Deployment
 
-1. Push this repo to GitHub.
-2. In Cloudflare → **Pages** → **Create application** → **Connect to Git**.
-3. Select the repo.
-4. Build settings:
-   - **Framework preset:** Astro
-   - **Build command:** `npm run build`
-   - **Build output directory:** `dist`
-   - **Node version:** 22.16.0
-5. Save and deploy.
-6. Cloudflare → **Pages** → project → **Custom domains** → add `kevinminn.com` and `www.kevinminn.com`. Cloudflare auto-issues TLS via Universal SSL.
+This deploys to **Cloudflare Workers, not Pages**. The full runbook, including
+secrets, the R2 bucket, and the known traps, is in
+[`docs/DEPLOY.md`](./docs/DEPLOY.md).
 
-DNS is already on Cloudflare nameservers via Porkbun, so no DNS work is needed.
+```bash
+npm run build
+npx wrangler deploy --config dist/server/wrangler.json
+```
+
+DNS is on Cloudflare nameservers via Porkbun.
 
 ## Things that are intentional
 
@@ -106,7 +121,6 @@ DNS is already on Cloudflare nameservers via Porkbun, so no DNS work is needed.
 
 ## Things to do next
 
-- Replace placeholder portrait with the final shot if/when one comes in.
-- Build out ventures / writing / about content (currently stubs).
 - Add an OG image at `/public/assets/og.jpg` (1200x630).
-- Wire Substack/Newsletter signup on the writing page when ready.
+- Optimize the cover and logo PNGs; several are multi-megabyte and one is the homepage hero.
+- Point the DriftLab HQ beta form at `/api/subscribe` instead of `mailto:`.

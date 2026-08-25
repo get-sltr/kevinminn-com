@@ -3,11 +3,11 @@
   "type": "module",
   "version": "0.1.0",
   "private": true,
-  "description": "kevinminn.com — personal site for Kevin Minn (builder, writer, archivist of becoming).",
+  "description": "kevinminn.com \u2014 personal site for Kevin Minn (builder, writer, archivist of becoming).",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node scripts/postbuild.mjs",
     "preview": "astro preview",
     "astro": "astro",
     "format": "prettier --write \"src/**/*.{astro,ts,tsx,js,jsx,css,md}\"",

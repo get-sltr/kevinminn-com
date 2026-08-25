@@ -1,10 +1,11 @@
 import type { APIRoute } from 'astro';
+import { env } from 'cloudflare:workers';
 import { sanitizePath } from '../../../lib/vault/paths';
 
 export const prerender = false;
 
-export const DELETE: APIRoute = async ({ url, locals }) => {
-  const bucket = locals.runtime.env.VAULT_BUCKET;
+export const DELETE: APIRoute = async ({ url }) => {
+  const bucket = (env as unknown as ENV).VAULT_BUCKET;
   const rawKey = url.searchParams.get('key');
 
   if (!rawKey) {

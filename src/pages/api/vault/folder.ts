@@ -1,10 +1,11 @@
 import type { APIRoute } from 'astro';
+import { env } from 'cloudflare:workers';
 import { sanitizePath, isValidFilename } from '../../../lib/vault/paths';
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ request, locals }) => {
-  const bucket = locals.runtime.env.VAULT_BUCKET;
+export const POST: APIRoute = async ({ request }) => {
+  const bucket = (env as unknown as ENV).VAULT_BUCKET;
   const body = await request.json();
   const parent = (body.parent as string) || '';
   const name = body.name as string;
@@ -32,8 +33,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
   });
 };
 
-export const DELETE: APIRoute = async ({ url, locals }) => {
-  const bucket = locals.runtime.env.VAULT_BUCKET;
+export const DELETE: APIRoute = async ({ url }) => {
+  const bucket = (env as unknown as ENV).VAULT_BUCKET;
   const prefix = url.searchParams.get('prefix');
 
   if (!prefix) {
