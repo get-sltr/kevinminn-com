@@ -58,6 +58,11 @@ A private, password-gated document store at `/vault`, backed by the Cloudflare R
 
 **Folder convention:** R2 has no directories. Folders are zero-byte `<path>/.folder` marker objects. `list` filters markers out of the file listing, and `folder`'s DELETE treats a prefix containing only markers as empty. Anything walking the bucket needs to account for these markers.
 
+**Getting in:** nothing on the site links to `/vault`, by design. The login has no rate limiting, so an
+undiscoverable URL is doing real security work. The private way in is to **triple-tap the terracotta dot
+in the footer within 1.2 seconds** (`src/components/Footer.astro`). It is a `<span>`, never an anchor, so
+no crawlable link ever points at the vault. Do not add a visible vault link without asking.
+
 **UI:** `src/pages/vault/index.astro` is a single page with inline client JS that calls the endpoints via `fetch`. `login.astro` posts the password form to `/api/vault/auth`.
 
 **Secrets:** `VAULT_PASSWORD`, `VAULT_SECRET`, and `RESEND_API_KEY` are set on the Worker via `wrangler secret put`, never in `wrangler.toml`. For local work they go in `.dev.vars`, which is gitignored. Note that wrangler resolves that file relative to the config, so testing the built worker needs it copied to `dist/server/.dev.vars`.

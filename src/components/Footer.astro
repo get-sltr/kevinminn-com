@@ -14,7 +14,7 @@ const social = [
 <footer class="foot">
   <div class="foot__left">
     <span>&copy; {year} Kevin Minn</span>
-    <span class="foot__dot"></span>
+    <span class="foot__dot" id="foot-dot" aria-hidden="true"></span>
     <span class="foot__signed">made in Los Angeles</span>
   </div>
   <div class="foot__social">
@@ -31,3 +31,30 @@ const social = [
     }
   </div>
 </footer>
+
+<script>
+  // Private way into the vault: triple-tap the footer dot inside 1.2s.
+  // Deliberately not a link, so nothing crawlable ever points at /vault. The
+  // login has no rate limiting, so the URL staying undiscovered is doing real
+  // security work. A triple tap is hard to trigger by accident.
+  const dot = document.getElementById('foot-dot');
+  if (dot) {
+    let taps = 0;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    dot.addEventListener('click', () => {
+      taps += 1;
+      if (timer) clearTimeout(timer);
+
+      if (taps >= 3) {
+        taps = 0;
+        window.location.href = '/vault';
+        return;
+      }
+
+      timer = setTimeout(() => {
+        taps = 0;
+      }, 1200);
+    });
+  }
+</script>
