@@ -28,6 +28,22 @@
       @apply overflow-hidden;
     }
   }
+
+  /* iOS Safari zooms the page whenever a focused field is under 16px, and does
+     not zoom back out. Every input on the site must clear that bar on phones. */
+  @media (max-width: 768px) {
+    input,
+    select,
+    textarea {
+      font-size: 16px;
+    }
+  }
+
+  /* Nothing should ever scroll the page sideways on a phone. */
+  html,
+  body {
+    overflow-x: hidden;
+  }
 }
 
 /* ===== COMPONENT CLASSES (shared across pages) ===== */
@@ -54,13 +70,14 @@
       @apply px-5;
     }
   }
+  /* Default is ink, because every page except home sits on cream. Home puts the
+     mark over a dark photo and overrides this locally. */
   .nav-top__mark {
-    @apply font-serif text-[20px] font-normal tracking-tight text-paper;
-    text-shadow: 0 1px 16px rgba(0, 0, 0, 0.35);
+    @apply font-serif text-[20px] font-normal tracking-tight text-ink;
   }
   .nav-top__mark em {
     @apply italic font-normal not-italic;
-    color: #d89b7e;
+    color: #b4543e;
     font-style: italic;
   }
   .nav-top__links {
@@ -172,7 +189,13 @@
       @apply flex-col items-start gap-4 px-0;
     }
     .foot__social {
-      @apply gap-4;
+      @apply gap-4 flex-wrap;
+    }
+    .foot__social a {
+      @apply py-2 text-sm;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
     }
   }
 

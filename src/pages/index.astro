@@ -12,15 +12,27 @@ import WelcomeSide from '../components/WelcomeSide.astro';
 </Base>
 
 <style>
+  /* Home is the exception: the mark sits over the dark cover panel. */
+  :global(.nav-top__mark) {
+    color: #fbf8f3;
+    text-shadow: 0 1px 16px rgba(0, 0, 0, 0.35);
+  }
+  :global(.nav-top__mark em) {
+    color: #d89b7e;
+  }
+
   .hero {
     min-height: 100vh;
+    /* dvh tracks the shrinking mobile address bar; vh does not. */
+    min-height: 100dvh;
     display: grid;
     grid-template-columns: 1fr 1fr;
   }
   @media (max-width: 768px) {
     .hero {
       grid-template-columns: 1fr;
-      grid-template-rows: 50vh auto;
+      grid-template-rows: auto auto;
+      min-height: 0;
     }
   }
 </style>
