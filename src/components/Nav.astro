@@ -1,6 +1,6 @@
 ---
 export interface Props {
-  activePage?: 'welcome' | 'ventures' | 'writing' | 'about' | 'contact';
+  activePage?: 'welcome' | 'sltr' | 'vindicara' | 'writing' | 'contact';
 }
 const { activePage = 'welcome' } = Astro.props;
 
@@ -9,7 +9,6 @@ const links: Array<{ key: NonNullable<Props['activePage']>; label: string; href:
   { key: 'sltr', label: 'SLTR Digital', href: '/sltr-digital' },
   { key: 'vindicara', label: 'Vindicara', href: '/vindicara' },
   { key: 'writing', label: 'Writing', href: '/writing' },
-  { key: 'about', label: 'About', href: '/about' },
   { key: 'contact', label: 'Contact', href: '/contact' },
 ];
 ---

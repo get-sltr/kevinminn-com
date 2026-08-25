@@ -5,3 +5,7 @@
 # /ventures was split into two pages
 /ventures /sltr-digital 301
 /ventures/ /sltr-digital 301
+
+# /about was removed
+/about / 301
+/about/ / 301
