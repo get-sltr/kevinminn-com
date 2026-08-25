@@ -70,9 +70,14 @@ export const POST: APIRoute = async ({ request }) => {
   // absent, the person is still subscribed and still gets a success response.
   let confirmation: string;
   try {
-    const result = await sendConfirmation(email, (env as unknown as ENV).RESEND_API_KEY);
+    const key = (env as unknown as ENV).RESEND_API_KEY;
+    const result = await sendConfirmation(email, key);
     confirmation = result.sent ? 'sent' : (result.error ?? 'failed');
-  } catch {
+    // Always log the outcome. Logging only failures hid the case where the key
+    // is simply absent, which returns early and looks identical from outside.
+    console.log('[subscribe] key present:', Boolean(key), '| confirmation:', confirmation);
+  } catch (err) {
+    console.error('[subscribe] confirmation threw', String(err));
     confirmation = 'failed';
   }
 

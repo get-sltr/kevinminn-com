@@ -84,6 +84,12 @@ export async function sendConfirmation(to: string, apiKey?: string): Promise<Sen
     signal: AbortSignal.timeout(5000),
   });
 
-  if (!res.ok) return { sent: false, error: `resend_${res.status}` };
+  if (!res.ok) {
+    // Log the body. A silent failure here is invisible from the outside, which
+    // is exactly how a broken signup pipeline goes unnoticed for weeks.
+    const body = await res.text().catch(() => '');
+    console.error('[subscribe] resend rejected', res.status, body.slice(0, 400));
+    return { sent: false, error: `resend_${res.status}` };
+  }
   return { sent: true };
 }
