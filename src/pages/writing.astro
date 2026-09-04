@@ -14,6 +14,13 @@ import Footer from '../components/Footer.astro';
       <div class="eyebrow">A memoir, this fall</div>
       <h1>Remember <em>My Name.</em></h1>
       <p class="sub">A passage from the prologue. Set as it will appear on the page.</p>
+
+      <div class="signup">
+        <p class="lh">Hear the release date first.</p>
+        <p class="lp">One letter when there is news. No funnel, no spam, no other plans.</p>
+        <a class="signup-cta" href="/notify">Notify me</a>
+      </div>
+
       <div class="cue">
         <span>Turn to first page</span>
         <span class="line"></span>
@@ -72,7 +79,11 @@ import Footer from '../components/Footer.astro';
             data-cover="/assets/bookcover6.png"
             data-alt="Front cover of Remember My Name"
           >
-            <img src="/assets/bookcover6.png" alt="Front cover of Remember My Name" loading="lazy" />
+            <img
+              src="/assets/bookcover6.png"
+              alt="Front cover of Remember My Name"
+              loading="lazy"
+            />
             <span class="sr-only">Enlarge the front cover</span>
           </button>
           <figcaption>Front</figcaption>
@@ -104,13 +115,10 @@ import Footer from '../components/Footer.astro';
         </p>
       </div>
 
-      <p class="submission-line"><em>Releasing this fall.</em></p>
-
-      <div class="signup">
-        <p class="lh">Hear the release date first.</p>
-        <p class="lp">One letter when there is news. No funnel, no spam, no other plans.</p>
-        <a class="signup-cta" href="/notify">Notify me</a>
-      </div>
+      <p class="submission-line">
+        <em>Releasing this fall.</em>
+        <a class="submission-link" href="/notify">Notify me</a>
+      </p>
     </div>
   </section>
 
@@ -208,7 +216,7 @@ import Footer from '../components/Footer.astro';
     letter-spacing: -0.005em;
   }
   .cue {
-    margin-top: 56px;
+    margin-top: 48px;
     font-family: 'Inter', sans-serif;
     font-size: 10px;
     font-weight: 500;
@@ -569,16 +577,25 @@ import Footer from '../components/Footer.astro';
     font-family: 'Fraunces', serif;
     font-size: 16px;
     color: #4a453d;
-    margin-bottom: 56px;
     letter-spacing: 0.02em;
   }
   .submission-line em {
     font-style: italic;
   }
+  .submission-link {
+    color: #b4543e;
+    text-decoration: none;
+    border-bottom: 1px solid #d89b7e;
+    margin-left: 6px;
+    transition: border-color 0.2s;
+  }
+  .submission-link:hover {
+    border-color: #b4543e;
+  }
 
   .signup {
     max-width: 620px;
-    margin: 0 auto;
+    margin: 40px auto 0;
     background: #fbf8f3;
     padding: 36px 32px;
     border-radius: 4px;

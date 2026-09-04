@@ -6,9 +6,9 @@ const { activePage = 'welcome' } = Astro.props;
 
 const links: Array<{ key: NonNullable<Props['activePage']>; label: string; href: string }> = [
   { key: 'welcome', label: 'Welcome', href: '/' },
+  { key: 'writing', label: 'Writing', href: '/writing' },
   { key: 'sltr', label: 'SLTR Digital', href: '/sltr-digital' },
   { key: 'vindicara', label: 'Vindicara', href: '/vindicara' },
-  { key: 'writing', label: 'Writing', href: '/writing' },
   { key: 'contact', label: 'Contact', href: '/contact' },
 ];
 ---
@@ -35,9 +35,9 @@ const links: Array<{ key: NonNullable<Props['activePage']>; label: string; href:
     </div>
     <button class="nav-top__hamburger" id="nav-hamburger" aria-label="Open menu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <line x1="4" y1="7" x2="20" y2="7" />
-        <line x1="4" y1="12" x2="20" y2="12" />
-        <line x1="4" y1="17" x2="20" y2="17" />
+        <line x1="4" y1="7" x2="20" y2="7"></line>
+        <line x1="4" y1="12" x2="20" y2="12"></line>
+        <line x1="4" y1="17" x2="20" y2="17"></line>
       </svg>
     </button>
   </div>
@@ -46,17 +46,13 @@ const links: Array<{ key: NonNullable<Props['activePage']>; label: string; href:
 <div class="nav-top__mobile-menu" id="mobile-menu">
   <button class="nav-top__mobile-close" id="nav-close" aria-label="Close menu">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-      <line x1="6" y1="6" x2="18" y2="18" />
-      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+      <line x1="18" y1="6" x2="6" y2="18"></line>
     </svg>
   </button>
   {
     links.map((link) => (
-      <a
-        href={link.href}
-        class={link.key === activePage ? 'is-active' : ''}
-        data-interstitial-link
-      >
+      <a href={link.href} class={link.key === activePage ? 'is-active' : ''} data-interstitial-link>
         {link.label}
       </a>
     ))
