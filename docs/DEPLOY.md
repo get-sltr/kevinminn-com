@@ -46,6 +46,17 @@ the publish directory is wrong for this repo.
    2026-09-10). If it is missing, the confirm link returns 503. Never commit the PDF;
    the GitHub repo is public. To replace it:
    `npx wrangler r2 object put km-v/private/chapter-one.pdf --file <pdf> --content-type application/pdf --remote`
+5. The chapter text for the email body must exist at `km-v/private/chapter-one.json`, shaped
+   `{ "label": "Chapter One", "title": "...", "paragraphs": ["...", "..."] }`. If it is missing,
+   the email still sends with a Read Chapter One button instead. Edit it by downloading with
+   `wrangler r2 object get ... --remote --file`, changing it, and putting it back with
+   `--content-type application/json`. It was built from the PDF, one entry per indented paragraph.
+   Never commit it.
+
+The email footer shows only `Los Angeles, CA` (`MAILING_ADDRESS` in `src/lib/email.ts`), by Kevin's
+choice. CAN-SPAM expects a valid physical postal address in commercial email, which a city alone is
+not. A USPS PO Box or a registered private mailbox satisfies it without exposing a home address; swap
+the constant and its test when one exists.
 
 Set them with `wrangler secret put <NAME>`. Never put real values in
 `wrangler.toml`, and never commit `.dev.vars`.
@@ -72,8 +83,8 @@ Check these, because a green build proves nothing about runtime bindings:
 - `/vault` redirects to `/vault/login`; the password works; a folder can be created
 - `/book` redirects to `/notify`
 - `/notify` accepts an email, and a record appears under `signups/` in the vault
-- The Chapter One email actually arrives, its button downloads the PDF, and the
-  record flips to `confirmed`
+- The Chapter One email actually arrives with the chapter in the body, its PDF link
+  opens the PDF, and the record flips to `confirmed`
 
 ## Traps, all of which cost time already
 
@@ -139,7 +150,7 @@ R2 bucket `km-v`, one bucket for everything:
   signup updates that person's record rather than adding a second unreadable row.
 - Signup lookups: `index/email/` and `index/token/` pointer objects
 - Rate limit counters: `ratelimit/<YYYY-MM-DDTHH>/<hash>`, never cleaned up by design
-- Chapter One: `private/chapter-one.pdf`
+- Chapter One: `private/chapter-one.pdf`, and its email body text at `private/chapter-one.json`
 
 One object per signup is deliberate. A single rolling list would need
 read-modify-write, and two simultaneous submissions would silently lose an address.

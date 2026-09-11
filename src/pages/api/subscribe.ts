@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
+import { loadChapter } from '../../lib/chapter';
 import { CONSENT_TEXT, CONSENT_VERSION } from '../../lib/consent';
 import { sendConfirmation } from '../../lib/email';
 import { isRateLimited } from '../../lib/ratelimit';
@@ -108,7 +109,9 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     const apiKey = runtime.RESEND_API_KEY;
     const links = linksFor(new URL(request.url).origin, record.token as string);
-    const result = await sendConfirmation(email, links, apiKey);
+    // Chapter text rides in the email body. Without it the email still sends, with a link.
+    const chapter = await loadChapter(bucket);
+    const result = await sendConfirmation(email, links, chapter, apiKey);
     emailResult = result.sent ? 'sent' : (result.error ?? 'failed');
     // Always log the outcome. Logging only failures hid the case where the key
     // is simply absent, which returns early and looks identical from outside.

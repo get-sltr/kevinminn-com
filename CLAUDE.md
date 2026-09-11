@@ -75,15 +75,18 @@ that prefix, and these endpoints have to be public. It still writes into the vau
 `signups/`, one object per person, so the list is readable from the `/vault` browser.
 
 Signup delivers Chapter One. `/api/subscribe` stores the person as `unconfirmed` with a random
-64-hex token and emails a Read Chapter One link. `/api/confirm?token=` marks them `confirmed` and
+64-hex token and emails the whole chapter inline, loaded per send from R2 at
+`private/chapter-one.json` (`src/lib/chapter.ts`), followed by the release date and a small PDF link.
+If that object is missing or malformed, the email falls back to a Read Chapter One button.
+`/api/confirm?token=` (the PDF link) marks them `confirmed` and
 streams the PDF from R2 at `private/chapter-one.pdf`; the link works forever. `/api/unsubscribe?token=`
 marks them `unsubscribed`. Lookups go through pointer objects (`index/email/<sha256>.json`,
 `index/token/<token>.json`), never a bucket scan; `src/lib/subscribers.ts` holds all of it. A confirmed
 address resubmitting is a no-op; anyone else gets the email again with the same token. The endpoint
 returns `ok` either way so it cannot reveal who is on the list.
 
-**The PDF must never be committed.** The GitHub repo is public. The local copy is gitignored and the
-only real copy lives in R2.
+**The manuscript must never be committed**, neither the PDF nor the chapter text. The GitHub repo is
+public. The local PDF is gitignored and the only real copies live in R2.
 
 `/api/subscribe` is rate limited to 10 per IP per hour (`src/lib/ratelimit.ts`) with a counter in R2
 at `ratelimit/<hour>/<hmac of ip>`. Cloudflare's own limiter only does 10 or 60 second windows. Old
