@@ -25,7 +25,7 @@ import { CONSENT_TEXT } from '../lib/consent';
       </div>
 
       <div class="box">
-        <p class="lh">Hear the release date first.</p>
+        <p class="lh">Get the release date and Chapter One first.</p>
         <p class="lp">One letter when there is news. No funnel, no spam, no other plans.</p>
 
         <form id="notify-form" novalidate>
@@ -51,7 +51,7 @@ import { CONSENT_TEXT } from '../lib/consent';
             <label for="notify-website">Leave this field empty</label>
             <input id="notify-website" name="website" type="text" tabindex="-1" autocomplete="off" />
           </div>
-          <button type="submit">Notify me</button>
+          <button type="submit">Send me Chapter One</button>
         </form>
 
         <p class="status" id="notify-status" role="status" aria-live="polite"></p>
@@ -305,7 +305,7 @@ import { CONSENT_TEXT } from '../lib/consent';
 
         if (res.ok && body.ok) {
           form.hidden = true;
-          statusEl.textContent = 'Thank you. You will hear from me when the date is set.';
+          statusEl.textContent = 'Check your email. Chapter One is waiting for you.';
         } else {
           statusEl.textContent = body.error || 'Something went wrong. Please try again.';
           statusEl.classList.add('is-error');

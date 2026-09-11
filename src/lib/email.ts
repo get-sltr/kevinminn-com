@@ -1,25 +1,23 @@
-// Confirmation email via Resend's REST API.
+// Chapter One email via Resend's REST API.
 // Deliberately plain fetch rather than the resend npm package, so this adds no
 // dependency. The builders below are pure so they can be tested without network.
 
-import { CONSENT_TEXT } from './consent';
-
 export const FROM = 'Kevin Minn <hello@kevinminn.com>';
 export const REPLY_TO = 'info@kevinminn.com';
-export const SUBJECT = "You're on the list";
+export const SUBJECT = 'Chapter One of Remember My Name';
 
-const THANKS = 'Thank you for your support. The next time you hear from me, the book will have a date.';
+// CAN-SPAM requires a physical postal address in every commercial email.
+export const MAILING_ADDRESS = '696 S New Hampshire Ave, Apt 2811, Los Angeles, CA 90005';
+
+const INTRO = 'Thank you for signing up. Click below and Chapter One is yours.';
+const BUTTON = 'Read Chapter One';
 
 // Kevin's line, used as written.
 const CLOSING = 'Always be the best authentic version of yourself. Be bold. Be relentless. Be you.';
 
-/** First name only, trimmed to something that cannot wreck the layout. */
-export function firstName(name: string | undefined): string {
-  const first = (name ?? '').trim().split(/\s+/)[0] ?? '';
-  return first.slice(0, 40);
-}
+export type EmailLinks = { confirmUrl: string; unsubscribeUrl: string };
 
-/** The name is visitor input going into an HTML email. It must be escaped. */
+/** Links are built from the request origin, so escape them before they land in HTML. */
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, '&amp;')
@@ -29,31 +27,27 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
-export function confirmationText(name?: string): string {
-  const who = firstName(name);
+export function confirmationText(links: EmailLinks): string {
   return [
     'REMEMBER MY NAME',
     '',
-    who ? `You're on the list, ${who}.` : "You're on the list.",
+    INTRO,
     '',
-    THANKS,
+    `${BUTTON}: ${links.confirmUrl}`,
     '',
     CLOSING,
     '',
     'Kevin',
     '',
     '---',
-    'To unsubscribe, just reply to this email and say so.',
-    '',
-    CONSENT_TEXT,
+    `Unsubscribe: ${links.unsubscribeUrl}`,
+    MAILING_ADDRESS,
   ].join('\n');
 }
 
-export function confirmationHtml(name?: string): string {
-  const who = firstName(name);
-  const greeting = who
-    ? `You&rsquo;re on the list, ${escapeHtml(who)}.`
-    : 'You&rsquo;re on the list.';
+export function confirmationHtml(links: EmailLinks): string {
+  const confirm = escapeHtml(links.confirmUrl);
+  const unsubscribe = escapeHtml(links.unsubscribeUrl);
   // Inline styles only, and no external assets. Mail clients strip stylesheets
   // and most block remote images by default.
   return `<div style="margin:0;padding:32px 16px;background:#f4efe6;">
@@ -61,22 +55,22 @@ export function confirmationHtml(name?: string): string {
     <div style="font-family:Helvetica,Arial,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.28em;text-transform:uppercase;color:#b4543e;">
       Remember My Name
     </div>
-    <p style="margin:24px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:26px;line-height:1.25;color:#1c1a17;">
-      ${greeting}
+    <p style="margin:24px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:18px;line-height:1.55;color:#1c1a17;">
+      ${INTRO}
     </p>
-    <p style="margin:16px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:18px;line-height:1.55;color:#4a453d;">
-      ${THANKS}
+    <p style="margin:28px 0 0;">
+      <a href="${confirm}" style="display:inline-block;padding:13px 24px;background:#b4543e;border-radius:2px;font-family:Helvetica,Arial,sans-serif;font-size:14px;font-weight:600;letter-spacing:0.04em;color:#fbf8f3;text-decoration:none;">${BUTTON}</a>
     </p>
-    <p style="margin:26px 0 0;padding-left:16px;border-left:2px solid #b4543e;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:18px;line-height:1.6;color:#1c1a17;">
+    <p style="margin:30px 0 0;padding-left:16px;border-left:2px solid #b4543e;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:18px;line-height:1.6;color:#1c1a17;">
       ${CLOSING}
     </p>
     <p style="margin:28px 0 0;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:17px;color:#1c1a17;">
       Kevin
     </p>
     <div style="margin-top:32px;padding-top:18px;border-top:1px solid #e8e1d2;font-family:Helvetica,Arial,sans-serif;font-size:11px;line-height:1.7;color:#8a8479;">
-      To unsubscribe, just reply to this email and say so.
-      <br /><br />
-      ${CONSENT_TEXT}
+      <a href="${unsubscribe}" style="color:#8a8479;text-decoration:underline;">Unsubscribe</a>
+      <br />
+      ${MAILING_ADDRESS}
     </div>
   </div>
 </div>`;
@@ -86,7 +80,7 @@ export type SendResult = { sent: boolean; error?: string };
 
 export async function sendConfirmation(
   to: string,
-  name?: string,
+  links: EmailLinks,
   apiKey?: string
 ): Promise<SendResult> {
   if (!apiKey) return { sent: false, error: 'not_configured' };
@@ -102,8 +96,10 @@ export async function sendConfirmation(
       to,
       reply_to: REPLY_TO,
       subject: SUBJECT,
-      html: confirmationHtml(name),
-      text: confirmationText(name),
+      html: confirmationHtml(links),
+      text: confirmationText(links),
+      // Lets mail clients show their own unsubscribe control.
+      headers: { 'List-Unsubscribe': `<${links.unsubscribeUrl}>` },
     }),
     // Bound the call so a hanging mail API cannot stall the request.
     signal: AbortSignal.timeout(5000),

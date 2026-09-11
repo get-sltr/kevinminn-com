@@ -2,6 +2,18 @@ import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
 import { CONSENT_TEXT, CONSENT_VERSION } from '../../lib/consent';
 import { sendConfirmation } from '../../lib/email';
+import { isRateLimited } from '../../lib/ratelimit';
+import {
+  actionFor,
+  findByEmail,
+  isValidToken,
+  linksFor,
+  newToken,
+  recordKey,
+  saveWithIndexes,
+  writeRecord,
+  type Subscriber,
+} from '../../lib/subscribers';
 
 export const prerender = false;
 
@@ -23,7 +35,14 @@ function json(body: unknown, status = 200) {
 export const POST: APIRoute = async ({ request }) => {
   // Astro v6 removed locals.runtime.env. Read the binding inside the handler,
   // not at module scope, since it is only populated per request.
-  const bucket = (env as unknown as ENV).VAULT_BUCKET;
+  const runtime = env as unknown as ENV;
+  const bucket = runtime.VAULT_BUCKET;
+
+  // Counted before anything else, so bots and malformed posts use up the limit too.
+  const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
+  if (await isRateLimited(bucket, ip, runtime.VAULT_SECRET)) {
+    return json({ error: 'Too many attempts. Please try again later.' }, 429);
+  }
 
   let payload: { name?: unknown; email?: unknown; website?: unknown };
   try {
@@ -48,64 +67,61 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ error: 'Enter your name.' }, 400);
   }
 
-  // One object per signup. A single rolling file would need read-modify-write,
-  // and two people submitting at once would silently lose one of the addresses.
-  //
-  // The key is the address itself, not a uuid, so the vault listing is readable
-  // at a glance. It also dedupes for free: someone signing up twice updates
-  // their record instead of leaving two rows you have to open to tell apart.
-  const now = new Date().toISOString();
-  const slugify = (value: string, max: number) =>
-    value
-      .toLowerCase()
-      .replace(/@/g, '-at-')
-      .replace(/[^a-z0-9._-]/g, '-')
-      .replace(/-{2,}/g, '-')
-      .replace(/^-|-$/g, '')
-      .slice(0, max);
+  // One record per address. A confirmed subscriber is left untouched, and the
+  // response is the same either way, so the form cannot reveal who is on the list.
+  const found = await findByEmail(bucket, email, name);
+  if (actionFor(found?.record ?? null) === 'none') {
+    return json({ ok: true });
+  }
 
-  // Name first so the vault listing reads as a list of people, not of strings.
-  const key = `signups/${slugify(name, 60)}__${slugify(email, 90)}.json`;
+  const now = new Date().toISOString();
+  const previous: Partial<Subscriber> = { ...found?.record };
+  delete previous.confirmation;
 
   // Store the consent notice verbatim, not just a boolean. If the wording ever
   // changes, each record still shows what that person was actually shown.
-  const record = {
-    name,
+  // The token is kept across resends so every link ever emailed keeps working.
+  const record: Subscriber = {
+    ...previous,
+    name: previous.name ?? name,
     email,
-    signedUpAt: now,
+    signedUpAt: previous.signedUpAt ?? now,
     source: 'remember-my-name',
     consent: {
       version: CONSENT_VERSION,
       text: CONSENT_TEXT,
       method: 'implied by form submission',
     },
+    status: 'unconfirmed',
+    token: isValidToken(previous.token) ? previous.token : newToken(),
+    emailResult: 'pending',
   };
-
-  const meta = { httpMetadata: { contentType: 'application/json' } };
+  const key = found?.key ?? recordKey(name, email);
 
   // Write first. The address is the thing we must never lose, so it is stored
   // before anything that can fail over the network is attempted.
-  await bucket.put(key, JSON.stringify({ ...record, confirmation: 'pending' }, null, 2), meta);
+  await saveWithIndexes(bucket, key, record);
 
-  // Confirmation is best effort. If Resend is down, misconfigured, or the key is
-  // absent, the person is still subscribed and still gets a success response.
-  let confirmation: string;
+  // Email is best effort. If Resend is down, misconfigured, or the key is
+  // absent, the person is still recorded and still gets a success response.
+  let emailResult: string;
   try {
-    const key = (env as unknown as ENV).RESEND_API_KEY;
-    const result = await sendConfirmation(email, name, key);
-    confirmation = result.sent ? 'sent' : (result.error ?? 'failed');
+    const apiKey = runtime.RESEND_API_KEY;
+    const links = linksFor(new URL(request.url).origin, record.token as string);
+    const result = await sendConfirmation(email, links, apiKey);
+    emailResult = result.sent ? 'sent' : (result.error ?? 'failed');
     // Always log the outcome. Logging only failures hid the case where the key
     // is simply absent, which returns early and looks identical from outside.
-    console.log('[subscribe] key present:', Boolean(key), '| confirmation:', confirmation);
+    console.log('[subscribe] key present:', Boolean(apiKey), '| email:', emailResult);
   } catch (err) {
-    console.error('[subscribe] confirmation threw', String(err));
-    confirmation = 'failed';
+    console.error('[subscribe] email threw', String(err));
+    emailResult = 'failed';
   }
 
-  // Second write records the outcome, so a failed confirmation is visible in the
+  // Second write records the outcome, so a failed email is visible in the
   // vault instead of silently unknown. If this write fails the signup still stands.
   try {
-    await bucket.put(key, JSON.stringify({ ...record, confirmation }, null, 2), meta);
+    await writeRecord(bucket, key, { ...record, emailResult });
   } catch {
     /* the pending record is already durable */
   }

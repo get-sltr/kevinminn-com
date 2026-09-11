@@ -9,3 +9,7 @@
 # /about was removed
 /about / 301
 /about/ / 301
+
+# /book is the short link used in published copy for the signup page
+/book /notify 301
+/book/ /notify 301

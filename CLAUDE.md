@@ -69,13 +69,28 @@ no crawlable link ever points at the vault. Do not add a visible vault link with
 
 ## Book signup
 
-`/notify` is the signup page for the memoir. It posts JSON to `/api/subscribe`, which sits
-**outside** `/api/vault/*` on purpose: the middleware guards that prefix, and this endpoint has to
-be public. It still writes into the vault bucket under `signups/`, one object per signup, so the
-list is readable from the `/vault` browser.
+`/notify` is the signup page for the memoir (`/book` 301s to it via `public/_redirects`). It posts
+JSON to `/api/subscribe`, which sits **outside** `/api/vault/*` on purpose: the middleware guards
+that prefix, and these endpoints have to be public. It still writes into the vault bucket under
+`signups/`, one object per person, so the list is readable from the `/vault` browser.
 
-Order of operations is deliberate. The record is written to R2 *first*, then the confirmation email
-is attempted, then a second write records the outcome. A mail failure, a missing API key, or a
+Signup delivers Chapter One. `/api/subscribe` stores the person as `unconfirmed` with a random
+64-hex token and emails a Read Chapter One link. `/api/confirm?token=` marks them `confirmed` and
+streams the PDF from R2 at `private/chapter-one.pdf`; the link works forever. `/api/unsubscribe?token=`
+marks them `unsubscribed`. Lookups go through pointer objects (`index/email/<sha256>.json`,
+`index/token/<token>.json`), never a bucket scan; `src/lib/subscribers.ts` holds all of it. A confirmed
+address resubmitting is a no-op; anyone else gets the email again with the same token. The endpoint
+returns `ok` either way so it cannot reveal who is on the list.
+
+**The PDF must never be committed.** The GitHub repo is public. The local copy is gitignored and the
+only real copy lives in R2.
+
+`/api/subscribe` is rate limited to 10 per IP per hour (`src/lib/ratelimit.ts`) with a counter in R2
+at `ratelimit/<hour>/<hmac of ip>`. Cloudflare's own limiter only does 10 or 60 second windows. Old
+hours are never read again and there is deliberately no cleanup job.
+
+Order of operations is deliberate. The record is written to R2 *first*, then the email is attempted,
+then a second write records the outcome in `emailResult`. A mail failure, a missing API key, or a
 Resend outage must never cost a subscriber, so the endpoint returns `ok` regardless.
 
 `src/lib/consent.ts` is the single source of truth for the consent notice. Both the page and the

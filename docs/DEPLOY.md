@@ -40,7 +40,12 @@ the publish directory is wrong for this repo.
 |---|---|
 | `VAULT_PASSWORD` | Vault login always rejects |
 | `VAULT_SECRET` | Vault routes 500. HMAC refuses a zero-length key, so this throws rather than failing gracefully |
-| `RESEND_API_KEY` | Signups still work and still persist; the confirmation email is skipped and the record stores `confirmation: "not_configured"` |
+| `RESEND_API_KEY` | Signups still work and still persist; the Chapter One email is skipped and the record stores `emailResult: "not_configured"` |
+
+4. The Chapter One PDF must exist in R2 at `km-v/private/chapter-one.pdf` (uploaded
+   2026-09-10). If it is missing, the confirm link returns 503. Never commit the PDF;
+   the GitHub repo is public. To replace it:
+   `npx wrangler r2 object put km-v/private/chapter-one.pdf --file <pdf> --content-type application/pdf --remote`
 
 Set them with `wrangler secret put <NAME>`. Never put real values in
 `wrangler.toml`, and never commit `.dev.vars`.
@@ -65,8 +70,10 @@ Check these, because a green build proves nothing about runtime bindings:
 - `/` shows the book cover, uncropped
 - `/ventures` lists Nourished by Mira, DriftLab HQ, Project AIR, Axiisium, Amyneion
 - `/vault` redirects to `/vault/login`; the password works; a folder can be created
+- `/book` redirects to `/notify`
 - `/notify` accepts an email, and a record appears under `signups/` in the vault
-- The confirmation email actually arrives
+- The Chapter One email actually arrives, its button downloads the PDF, and the
+  record flips to `confirmed`
 
 ## Traps, all of which cost time already
 
@@ -130,6 +137,9 @@ R2 bucket `km-v`, one bucket for everything:
 - Book signups: `signups/<name>__<email>.json`, one object per person. The key carries
   the identity so the vault listing is readable without opening each file, and a repeat
   signup updates that person's record rather than adding a second unreadable row.
+- Signup lookups: `index/email/` and `index/token/` pointer objects
+- Rate limit counters: `ratelimit/<YYYY-MM-DDTHH>/<hash>`, never cleaned up by design
+- Chapter One: `private/chapter-one.pdf`
 
 One object per signup is deliberate. A single rolling list would need
 read-modify-write, and two simultaneous submissions would silently lose an address.

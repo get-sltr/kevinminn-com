@@ -29,3 +29,6 @@ pnpm-debug.log*
 .wrangler/
 .dev.vars
 .dev.vars.*
+
+# Chapter One manuscript. Lives only in R2 (km-v/private/chapter-one.pdf); the repo is public
+The Boy in the Corner.pdf
