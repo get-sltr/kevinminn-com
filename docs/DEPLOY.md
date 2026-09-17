@@ -76,12 +76,15 @@ reversible.
 
 ## The www redirect
 
-`www.kevinminn.com` has to 301 to `kevinminn.com`. This cannot be finished in the
-repo alone, and it takes two pieces in the Cloudflare dashboard for the
-`kevinminn.com` zone. Neither touches apex serving.
+**Configured 2026-09-17. Both pieces are live.** What follows is the record of
+what exists, so it can be rebuilt or audited.
+
+`www.kevinminn.com` 301s to `kevinminn.com`. This could not be done in the repo
+alone, and it took two pieces in the Cloudflare dashboard for the `kevinminn.com`
+zone. Neither touches apex serving.
 
 **1. DNS.** Dashboard, `kevinminn.com` zone, **DNS > Records**. Without a record,
-www resolves to nothing, which is the symptom the site had. Add:
+www resolves to nothing, which was the symptom the site had:
 
 | Type | Name | Target | Proxy |
 |---|---|---|---|
@@ -93,10 +96,10 @@ answers first. A proxied `CNAME www -> kevinminn.com` works too, but it makes ww
 a second origin for the site, which is exactly what the redirect is meant to
 prevent.
 
-**2. Redirect rule.** Dashboard, `kevinminn.com` zone, **Rules > Redirect Rules >
-Create rule**, single redirect:
+**2. Redirect rule.** Dashboard, `kevinminn.com` zone, **Rules > Redirect Rules**.
+The live rule is named `Redirect www to kevinminn.com`:
 
-- Expression: `(http.host eq "www.kevinminn.com")`
+- Match: custom filter expression, `(http.host eq "www.kevinminn.com")`
 - Target URL: dynamic, `concat("https://kevinminn.com", http.request.uri.path)`
 - Status: `301`
 - Preserve query string: on
@@ -104,14 +107,27 @@ Create rule**, single redirect:
 This runs at the edge before Workers, so it costs no Worker invocations and
 applies to prerendered pages, which never reach worker code at all.
 
+**Do not use the built-in `redirect-www-to-root` template as it ships.** It
+matches on the wildcard `https://www.*`, which only covers TLS. A plain
+`http://www.kevinminn.com/` request then misses the rule, falls through to the
+`100::` origin, and returns **522** rather than redirecting. Matching on
+`http.host` instead is scheme agnostic and fixes it in one hop. The template also
+leaves "preserve query string" off, which is correct for its `wildcard_replace`
+on `full_uri` because that already carries the query, but wrong for the
+`uri.path` target used here. That distinction matters: `/api/confirm?token=` and
+`/api/unsubscribe?token=` are links in sent email, and dropping the query would
+break them.
+
 **Why it is not in the repo.** `public/_redirects` is the obvious home for it,
 but Workers static assets explicitly do not support domain-level rules there, only
 paths. `src/middleware.ts` carries the same redirect as a fallback for anything
-that does reach the worker (`/api/*`, `/vault/*`), so the SSR side is safe even
-before the dashboard rule exists. Static pages on www stay wrong until it does.
+that does reach the worker (`/api/*`, `/vault/*`). With the dashboard rule in
+place the middleware should never fire, since the edge answers first.
 
 Verify with `curl -sI https://www.kevinminn.com/writing/`, which must return `301`
-and `location: https://kevinminn.com/writing/`.
+and `location: https://kevinminn.com/writing/`. Check the plain `http://` form
+too, and a URL carrying a query string, since those are the two cases the
+template gets wrong.
 
 ## Verifying a deploy
 
