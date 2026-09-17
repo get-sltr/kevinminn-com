@@ -1,0 +1,250 @@
+---
+import Base from '../layouts/Base.astro';
+import Footer from '../components/Footer.astro';
+
+// Nourished by Mira stands on its own rather than sitting in the SLTR Digital
+// studio list. The company is Nourished by Mira Inc.; the product keeps the
+// plain name. The product copy below is the same line the studio page carried.
+const product = {
+  name: 'Nourished by Mira',
+  status: 'App Store',
+  image: '/assets/ventures/nourished-logo.png',
+  alt: 'Nourished by Mira product mark',
+  href: 'https://apps.apple.com/us/app/id6761938171',
+  hrefLabel: 'View on App Store',
+  copy: 'An iOS nutrition coach for losing fat while keeping muscle. Protein-first meal plans, body composition tracking, and portions that adapt around GLP-1 medication cycles.',
+};
+---
+
+<Base
+  activePage="nourished"
+  title="Nourished by Mira Inc. - Kevin Minn"
+  description="Nourished by Mira Inc. builds Nourished by Mira, an iOS nutrition coach for losing fat while keeping muscle."
+  ogImage="/assets/og-nourished-by-mira.jpg"
+  ogImageAlt="The Nourished by Mira product mark"
+>
+  <main class="page">
+    <section class="hero">
+      <div class="eyebrow">Company</div>
+      <h1>Nourished by <em>Mira.</em></h1>
+      <p class="lede">
+        Nourished by Mira Inc. is an independent company building nutrition software. Its first
+        product is Nourished by Mira, an iOS coach for losing fat without losing muscle.
+      </p>
+      <a
+        href="https://nourishedbymira.com"
+        class="section-link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Visit Nourished by Mira
+      </a>
+    </section>
+
+    <section class="venture-section" aria-labelledby="product-heading">
+      <div class="product-label" id="product-heading">Product</div>
+
+      <article class="app-card">
+        <div class="app-mark">
+          <img src={product.image} alt={product.alt} loading="lazy" />
+        </div>
+        <div class="app-copy">
+          <div class="app-meta">{product.status}</div>
+          <h3>{product.name}</h3>
+          <p>{product.copy}</p>
+          <a href={product.href} class="app-link" target="_blank" rel="noopener noreferrer">
+            {product.hrefLabel}
+          </a>
+        </div>
+      </article>
+    </section>
+
+    <a href="/" class="back" data-interstitial-link>&larr; Back to welcome</a>
+    <Footer />
+  </main>
+</Base>
+
+<style>
+  .page {
+    padding: 140px 80px 40px;
+    min-height: 100vh;
+  }
+  .eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.24em;
+    color: #b4543e;
+    margin-bottom: 28px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 28px;
+    height: 1px;
+    background: #b4543e;
+  }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(48px, 6vw, 88px);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    color: #1c1a17;
+    margin-bottom: 32px;
+  }
+  h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: #b4543e;
+  }
+  .lede {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(18px, 1.4vw, 21px);
+    line-height: 1.55;
+    color: #4a453d;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .venture-section {
+    border-top: 1px solid #e8e1d2;
+    padding: 48px 0 72px;
+  }
+  .product-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #8a8479;
+    margin: 0 0 24px;
+    text-align: center;
+  }
+  .app-meta {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #8a8479;
+    margin-bottom: 14px;
+  }
+  /* Logo capped the same way the studio page caps it, so the artwork does not
+     grow just because this card has the page to itself. */
+  .app-mark {
+    max-width: 150px;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow:
+      0 2px 6px rgba(28, 26, 23, 0.12),
+      0 14px 34px rgba(28, 26, 23, 0.14);
+  }
+  .app-mark img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .app-copy {
+    padding: 28px 0 0;
+  }
+  .app-copy h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 1.1;
+    color: #1c1a17;
+    letter-spacing: -0.02em;
+    margin-bottom: 14px;
+  }
+  .app-copy p {
+    color: #4a453d;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    max-width: 42ch;
+  }
+  .app-link,
+  .section-link {
+    display: inline-flex;
+    margin-top: 18px;
+    color: #b4543e;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .app-link:hover,
+  .section-link:hover {
+    color: #1c1a17;
+  }
+  .back {
+    display: inline-flex;
+    justify-content: center;
+    text-align: center;
+    margin-top: 56px;
+    padding-top: 28px;
+    border-top: 1px solid #e8e1d2;
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #4a453d;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .back:hover {
+    color: #b4543e;
+  }
+
+  /* Centred, matching the other venture pages. Card interiors stay left
+     aligned, because centred body copy is hard to read. */
+  .hero,
+  .venture-section > .app-card,
+  .product-label {
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero {
+    margin-bottom: 88px;
+    text-align: center;
+  }
+  .app-card {
+    text-align: left;
+  }
+
+  @media (max-width: 980px) {
+    .page {
+      padding: 100px 32px 32px;
+    }
+  }
+  @media (max-width: 768px) {
+    .page {
+      padding: 88px 20px 24px;
+    }
+    .hero {
+      margin-bottom: 64px;
+    }
+    h1 {
+      font-size: clamp(36px, 10vw, 56px);
+    }
+    .lede {
+      font-size: 16px;
+    }
+    .venture-section {
+      padding: 40px 0 56px;
+    }
+    .app-copy {
+      padding: 22px 0 0;
+    }
+    .app-copy h3 {
+      font-size: 26px;
+    }
+  }
+</style>

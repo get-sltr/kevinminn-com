@@ -11,7 +11,7 @@ import type { APIRoute } from 'astro';
 // Trailing slashes on purpose: the build emits <page>/index.html, so these have
 // to match the canonical Base.astro renders, or crawlers see two URLs per page.
 // tests/pages/sitemap.test.ts fails if a new public page is not listed here.
-export const ROUTES = ['/', '/writing/', '/sltr-digital/', '/vindicara/', '/contact/', '/notify/'];
+export const ROUTES = ['/', '/writing/', '/sltr-digital/', '/vindicara/', '/nourished-by-mira/', '/contact/', '/notify/'];
 
 // Pure, like the builders in src/lib/email.ts, so the output can be asserted on
 // without standing up a request.

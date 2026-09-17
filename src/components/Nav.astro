@@ -4,7 +4,7 @@
 // in the markup or in the accessibility tree. A previous version shipped a second
 // copy of every link in a sibling div next to the landmark.
 export interface Props {
-  activePage?: 'welcome' | 'sltr' | 'vindicara' | 'writing' | 'contact';
+  activePage?: 'welcome' | 'sltr' | 'vindicara' | 'nourished' | 'writing' | 'contact';
 }
 const { activePage = 'welcome' } = Astro.props;
 
@@ -13,6 +13,7 @@ const links: Array<{ key: NonNullable<Props['activePage']>; label: string; href:
   { key: 'writing', label: 'Writing', href: '/writing' },
   { key: 'sltr', label: 'SLTR Digital', href: '/sltr-digital' },
   { key: 'vindicara', label: 'Vindicara', href: '/vindicara' },
+  { key: 'nourished', label: 'Nourished by Mira', href: '/nourished-by-mira' },
   { key: 'contact', label: 'Contact', href: '/contact' },
 ];
 ---

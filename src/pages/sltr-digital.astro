@@ -2,17 +2,9 @@
 import Base from '../layouts/Base.astro';
 import Footer from '../components/Footer.astro';
 
+// Nourished by Mira moved to its own page as Nourished by Mira Inc.
+// See src/pages/nourished-by-mira.astro.
 const studioApps = [
-  {
-    name: 'Nourished by Mira',
-    status: 'App Store',
-    image: '/assets/ventures/nourished-logo.png',
-    alt: 'Nourished by Mira product mark',
-    href: 'https://apps.apple.com/us/app/id6761938171',
-    hrefLabel: 'View on App Store',
-    copy:
-      'An iOS nutrition coach for losing fat while keeping muscle. Protein-first meal plans, body composition tracking, and portions that adapt around GLP-1 medication cycles.',
-  },
   {
     name: 'DriftLab HQ',
     status: 'Beta soon',
@@ -529,16 +521,17 @@ const studioApps = [
     text-align: center;
   }
 
-  /* ===== SPREAD THE TWO PRODUCTS OUT ===== */
+  /* ===== PRODUCT LAYOUT ===== */
   /* The hairline grid glued the cards together. Give each room of its own,
-     and cap the logo so widening the card does not enlarge the artwork. */
+     and cap the logo so widening the card does not enlarge the artwork.
+     Centred rather than edge anchored: with Nourished by Mira on its own page
+     this is a single card, and space-between left it stranded at one edge. */
   .app-grid {
-    /* Full page width, one product anchored to each edge. */
     max-width: none;
     margin-left: 0;
     margin-right: 0;
-    grid-template-columns: repeat(2, minmax(0, 380px));
-    justify-content: space-between;
+    grid-template-columns: repeat(auto-fit, minmax(0, 380px));
+    justify-content: center;
     gap: 64px;
     background: transparent;
     border: 0;
@@ -557,7 +550,7 @@ const studioApps = [
   .app-copy {
     padding: 28px 0 0;
   }
-  /* Wide enough now that "Nourished by Mira" sits on one line. */
+  /* Wide enough that the product name sits on one line. */
   .app-copy h3 {
     text-wrap: nowrap;
   }

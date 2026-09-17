@@ -120,6 +120,18 @@
     content: '';
     @apply absolute left-0 bottom-0 w-full h-px bg-accent;
   }
+  /* Six links need more room than five. Between the phone breakpoint and about
+     900px the full row would otherwise run into the brand mark, so tighten the
+     gap and the gutters across that band rather than letting them collide. */
+  @media (min-width: 769px) and (max-width: 900px) {
+    .nav-top__links {
+      @apply gap-5;
+    }
+    .nav-top__left,
+    .nav-top__right {
+      @apply px-6;
+    }
+  }
   /* Phones. This sits after the desktop rules on purpose: a media query adds no
      specificity, so source order is what decides the override. */
   @media (max-width: 768px) {
