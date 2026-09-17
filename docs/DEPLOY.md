@@ -74,6 +74,45 @@ hostname can only be attached in one place, so going live means removing it from
 Pages and adding it to the Worker. That swap causes brief downtime and is
 reversible.
 
+## The www redirect
+
+`www.kevinminn.com` has to 301 to `kevinminn.com`. This cannot be finished in the
+repo alone, and it takes two pieces in the Cloudflare dashboard for the
+`kevinminn.com` zone. Neither touches apex serving.
+
+**1. DNS.** Dashboard, `kevinminn.com` zone, **DNS > Records**. Without a record,
+www resolves to nothing, which is the symptom the site had. Add:
+
+| Type | Name | Target | Proxy |
+|---|---|---|---|
+| `AAAA` | `www` | `100::` | Proxied (orange cloud) |
+
+`100::` is the IPv6 discard prefix. The record exists only so the hostname
+reaches Cloudflare's edge; nothing is ever served from it because the rule below
+answers first. A proxied `CNAME www -> kevinminn.com` works too, but it makes www
+a second origin for the site, which is exactly what the redirect is meant to
+prevent.
+
+**2. Redirect rule.** Dashboard, `kevinminn.com` zone, **Rules > Redirect Rules >
+Create rule**, single redirect:
+
+- Expression: `(http.host eq "www.kevinminn.com")`
+- Target URL: dynamic, `concat("https://kevinminn.com", http.request.uri.path)`
+- Status: `301`
+- Preserve query string: on
+
+This runs at the edge before Workers, so it costs no Worker invocations and
+applies to prerendered pages, which never reach worker code at all.
+
+**Why it is not in the repo.** `public/_redirects` is the obvious home for it,
+but Workers static assets explicitly do not support domain-level rules there, only
+paths. `src/middleware.ts` carries the same redirect as a fallback for anything
+that does reach the worker (`/api/*`, `/vault/*`), so the SSR side is safe even
+before the dashboard rule exists. Static pages on www stay wrong until it does.
+
+Verify with `curl -sI https://www.kevinminn.com/writing/`, which must return `301`
+and `location: https://kevinminn.com/writing/`.
+
 ## Verifying a deploy
 
 Check these, because a green build proves nothing about runtime bindings:

@@ -21,6 +21,15 @@ import WelcomeSide from '../components/WelcomeSide.astro';
     color: #d89b7e;
   }
 
+  /* The phone menu button sits over that same dark panel, where the default ink
+     grey nearly disappears. Once the panel is open it is back on cream. */
+  :global(.nav-top__toggle) {
+    color: #fbf8f3;
+  }
+  :global(.nav-top__toggle[aria-expanded='true']) {
+    color: #1c1a17;
+  }
+
   .hero {
     min-height: 100vh;
     /* dvh tracks the shrinking mobile address bar; vh does not. */

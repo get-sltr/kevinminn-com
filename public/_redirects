@@ -1,6 +1,10 @@
 # Redirects for kevinminn.com
 # Format: /from-path /to-path 301
-# Currently no redirects needed; add them here as the site grows.
+#
+# www.kevinminn.com -> kevinminn.com cannot live here. Workers static assets
+# reject domain-level rules in _redirects, so it is a Cloudflare redirect rule
+# plus a proxied www DNS record instead. Both are written out in docs/DEPLOY.md,
+# with src/middleware.ts covering whatever reaches the worker itself.
 
 # /ventures was split into two pages
 /ventures /sltr-digital 301

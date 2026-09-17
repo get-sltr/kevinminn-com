@@ -9,6 +9,7 @@ export interface Props {
   activePage?: 'welcome' | 'sltr' | 'vindicara' | 'writing' | 'contact';
   noScroll?: boolean;
   ogImage?: string;
+  ogImageAlt?: string;
 }
 
 const {
@@ -17,9 +18,12 @@ const {
   activePage = 'welcome',
   noScroll = false,
   ogImage = '/assets/og.jpg',
+  ogImageAlt = 'Front cover of Remember My Name, a memoir by Kevin Minn',
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+// Scrapers for LinkedIn and most mail clients refuse relative image paths.
+const ogImageUrl = new URL(ogImage, Astro.site).toString();
 ---
 
 <!doctype html>
@@ -33,21 +37,32 @@ const canonical = new URL(Astro.url.pathname, Astro.site).toString();
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
 
-    <!-- Favicon -->
+    <!-- Favicon. The .ico is there because browsers request /favicon.ico on their
+         own, and because feed and preview tools still ignore SVG icons. -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" sizes="32x32" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
-    <!-- Open Graph -->
+    <!-- Open Graph. og:image is absolute and 1200x630, which is what LinkedIn
+         and mail clients need before they will render a preview card. -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Kevin Minn" />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:url" content={canonical} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={new URL(ogImage, Astro.site).toString()} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogImageAlt} />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={new URL(ogImage, Astro.site).toString()} />
+    <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
 
     <!-- Theme color (Cloudflare / mobile UI) -->
     <meta name="theme-color" content="#FBF8F3" />

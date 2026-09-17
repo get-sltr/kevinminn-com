@@ -1,4 +1,8 @@
 ---
+// One nav landmark holding one list of links. The same list renders as a row on
+// desktop and as a full-screen panel on phones, so the links are never duplicated
+// in the markup or in the accessibility tree. A previous version shipped a second
+// copy of every link in a sibling div next to the landmark.
 export interface Props {
   activePage?: 'welcome' | 'sltr' | 'vindicara' | 'writing' | 'contact';
 }
@@ -13,61 +17,117 @@ const links: Array<{ key: NonNullable<Props['activePage']>; label: string; href:
 ];
 ---
 
-<nav class="nav-top">
+<nav class="nav-top" aria-label="Main">
   <div class="nav-top__left">
     <a href="/" class="nav-top__mark" data-interstitial-link>
       kevin <em>minn</em>
     </a>
   </div>
   <div class="nav-top__right">
-    <div class="nav-top__links">
-      {
-        links.map((link) => (
-          <a
-            href={link.href}
-            class={`nav-top__link ${link.key === activePage ? 'is-active' : ''}`}
-            data-interstitial-link
-          >
-            {link.label}
-          </a>
-        ))
-      }
-    </div>
-    <button class="nav-top__hamburger" id="nav-hamburger" aria-label="Open menu">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+    <button
+      type="button"
+      class="nav-top__toggle"
+      id="nav-toggle"
+      aria-controls="nav-menu"
+      aria-expanded="false"
+    >
+      <span class="sr-only">Menu</span>
+      <svg
+        class="nav-top__icon nav-top__icon--menu"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        aria-hidden="true"
+      >
         <line x1="4" y1="7" x2="20" y2="7"></line>
         <line x1="4" y1="12" x2="20" y2="12"></line>
         <line x1="4" y1="17" x2="20" y2="17"></line>
       </svg>
+      <svg
+        class="nav-top__icon nav-top__icon--close"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        aria-hidden="true"
+      >
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+      </svg>
     </button>
+    <ul class="nav-top__links" id="nav-menu">
+      {
+        links.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              class={`nav-top__link ${link.key === activePage ? 'is-active' : ''}`}
+              aria-current={link.key === activePage ? 'page' : undefined}
+              data-interstitial-link
+            >
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
   </div>
 </nav>
 
-<div class="nav-top__mobile-menu" id="mobile-menu">
-  <button class="nav-top__mobile-close" id="nav-close" aria-label="Close menu">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-      <line x1="6" y1="6" x2="18" y2="18"></line>
-      <line x1="18" y1="6" x2="6" y2="18"></line>
-    </svg>
-  </button>
-  {
-    links.map((link) => (
-      <a href={link.href} class={link.key === activePage ? 'is-active' : ''} data-interstitial-link>
-        {link.label}
-      </a>
-    ))
-  }
-</div>
-
 <script>
-  const hamburger = document.getElementById('nav-hamburger');
-  const menu = document.getElementById('mobile-menu');
-  const close = document.getElementById('nav-close');
-  if (hamburger && menu && close) {
-    hamburger.addEventListener('click', () => menu.classList.add('is-open'));
-    close.addEventListener('click', () => menu.classList.remove('is-open'));
-    menu.querySelectorAll('a').forEach((a) => {
-      a.addEventListener('click', () => menu.classList.remove('is-open'));
+  const toggle = document.getElementById('nav-toggle');
+  const menu = document.getElementById('nav-menu');
+
+  if (toggle && menu) {
+    const isOpen = () => toggle.getAttribute('aria-expanded') === 'true';
+
+    const setOpen = (open: boolean) => {
+      toggle.setAttribute('aria-expanded', String(open));
+      menu.classList.toggle('is-open', open);
+      document.body.classList.toggle('nav-is-open', open);
+    };
+
+    toggle.addEventListener('click', () => {
+      const next = !isOpen();
+      setOpen(next);
+      if (next) menu.querySelector<HTMLAnchorElement>('a')?.focus();
+    });
+
+    // Links navigate away, but close first: the interstitial delays the jump,
+    // and a panel left open over the curtain looks broken.
+    menu.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => setOpen(false));
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (!isOpen()) return;
+
+      if (e.key === 'Escape') {
+        setOpen(false);
+        toggle.focus();
+        return;
+      }
+
+      // The open panel covers the page, so Tab must stay inside it.
+      if (e.key !== 'Tab') return;
+      const stops: HTMLElement[] = [toggle, ...Array.from(menu.querySelectorAll('a'))];
+      const first = stops[0];
+      const last = stops[stops.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    });
+
+    // The panel only exists on phones. Growing past the breakpoint with it open
+    // would otherwise leave the body scroll locked.
+    window.matchMedia('(min-width: 769px)').addEventListener('change', (e) => {
+      if (e.matches) setOpen(false);
     });
   }
 </script>

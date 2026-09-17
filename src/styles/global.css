@@ -29,6 +29,11 @@
     }
   }
 
+  /* The phone nav panel covers the page, so the page behind it must not scroll. */
+  body.nav-is-open {
+    @apply overflow-hidden;
+  }
+
   /* iOS Safari zooms the page whenever a focused field is under 16px, and does
      not zoom back out. Every input on the site must clear that bar on phones. */
   @media (max-width: 768px) {
@@ -81,71 +86,26 @@
     font-style: italic;
   }
   .nav-top__links {
-    @apply flex gap-9;
+    @apply flex gap-9 list-none p-0 m-0;
   }
-  .nav-top__hamburger {
+  /* One button drives the phone menu and doubles as its close control, so the
+     panel never needs a second copy of anything. */
+  .nav-top__toggle {
     display: none;
+    position: relative;
+    z-index: 2;
     background: none;
     border: none;
     cursor: pointer;
     padding: 8px;
     color: #4a453d;
   }
-  .nav-top__hamburger svg {
+  .nav-top__icon {
     width: 24px;
     height: 24px;
   }
-  .nav-top__mobile-menu {
+  .nav-top__icon--close {
     display: none;
-  }
-  @media (max-width: 768px) {
-    .nav-top__links {
-      display: none;
-    }
-    .nav-top__hamburger {
-      display: block;
-    }
-    .nav-top__mobile-menu {
-      position: fixed;
-      inset: 0;
-      z-index: 199;
-      background: #fbf8f3;
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 32px;
-    }
-    .nav-top__mobile-menu.is-open {
-      display: flex;
-    }
-    .nav-top__mobile-menu a {
-      font-family: 'Fraunces', serif;
-      font-size: 32px;
-      font-weight: 300;
-      color: #1c1a17;
-      text-decoration: none;
-      letter-spacing: -0.02em;
-    }
-    .nav-top__mobile-menu a:hover,
-    .nav-top__mobile-menu a.is-active {
-      color: #b4543e;
-      font-style: italic;
-    }
-    .nav-top__mobile-close {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 8px;
-      color: #1c1a17;
-    }
-    .nav-top__mobile-close svg {
-      width: 24px;
-      height: 24px;
-    }
   }
   .nav-top__link {
     @apply text-ink-soft no-underline text-sm font-normal relative pb-[3px] transition-colors;
@@ -159,6 +119,54 @@
   .nav-top__link.is-active::after {
     content: '';
     @apply absolute left-0 bottom-0 w-full h-px bg-accent;
+  }
+  /* Phones. This sits after the desktop rules on purpose: a media query adds no
+     specificity, so source order is what decides the override. */
+  @media (max-width: 768px) {
+    .nav-top__toggle {
+      display: block;
+    }
+    .nav-top__toggle[aria-expanded='true'] {
+      color: #1c1a17;
+    }
+    .nav-top__toggle[aria-expanded='true'] .nav-top__icon--menu {
+      display: none;
+    }
+    .nav-top__toggle[aria-expanded='true'] .nav-top__icon--close {
+      display: block;
+    }
+    /* Closed means display: none, which keeps the links out of the
+       accessibility tree rather than merely off screen. */
+    .nav-top__links {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      background: #fbf8f3;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+    }
+    .nav-top__links.is-open {
+      display: flex;
+    }
+    .nav-top__link {
+      font-family: 'Fraunces', serif;
+      font-size: 32px;
+      font-weight: 300;
+      color: #1c1a17;
+      letter-spacing: -0.02em;
+      padding-bottom: 0;
+    }
+    .nav-top__link:hover,
+    .nav-top__link.is-active {
+      color: #b4543e;
+      font-style: italic;
+    }
+    .nav-top__link.is-active::after {
+      content: none;
+    }
   }
 
   /* ----- Footer ----- */

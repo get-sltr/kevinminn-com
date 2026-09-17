@@ -4,11 +4,16 @@
 ---
 
 <div class="photo-side relative h-screen overflow-hidden">
-  <img
-    src="/assets/bookcover6.png"
-    alt="Front cover of Remember My Name, a memoir by Kevin Minn"
-    class="cover"
-  />
+  <div class="stack">
+    <img
+      src="/assets/bookcover6.png"
+      alt="Front cover of Remember My Name, a memoir by Kevin Minn"
+      class="cover"
+    />
+    <a href="/notify" class="cover-cta" data-interstitial-link>
+      Get the release date <span class="arr">&rarr;</span>
+    </a>
+  </div>
 </div>
 
 <style>
@@ -22,12 +27,22 @@
       linear-gradient(170deg, #241f1b 0%, #1c1a17 55%, #14120f 100%);
   }
 
+  .stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
   .cover {
     display: block;
     width: auto;
     height: auto;
     max-width: 100%;
-    max-height: 78vh;
+    /* Leaves room under the cover for the signup button without scrolling. */
+    max-height: 72vh;
     object-fit: contain;
     border-radius: 2px;
     box-shadow:
@@ -36,12 +51,44 @@
       0 40px 90px rgba(0, 0, 0, 0.35);
   }
 
+  /* Same pill as the two buttons on the welcome side, inverted for the dark wall. */
+  .cover-cta {
+    flex: none;
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    padding: 14px 22px;
+    border-radius: 999px;
+    background: #fbf8f3;
+    color: #1c1a17;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.25s ease;
+  }
+  .cover-cta:hover {
+    background: #d89b7e;
+    transform: translateY(-1px);
+  }
+  .cover-cta:focus-visible {
+    outline: 2px solid #d89b7e;
+    outline-offset: 4px;
+  }
+  .cover-cta .arr {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 15px;
+    line-height: 1;
+  }
+
   @media (max-width: 980px) {
     .photo-side {
       padding: 32px;
     }
     .cover {
-      max-height: 70vh;
+      max-height: 64vh;
     }
   }
 
@@ -51,9 +98,16 @@
       min-height: 0;
       padding: 88px 24px 32px;
     }
+    .stack {
+      gap: 24px;
+    }
     .cover {
       max-height: 52dvh;
       max-width: 66%;
+    }
+    .cover-cta {
+      padding: 12px 18px;
+      font-size: 12px;
     }
   }
 </style>
