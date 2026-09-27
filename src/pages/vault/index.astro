@@ -63,11 +63,14 @@ import '../../styles/global.css';
     </div>
 
     <script>
+      import { renderDocx } from '../../lib/vault/docx';
+
       let currentPrefix = '';
       let deleteTarget: { type: 'file' | 'folder'; key: string } | null = null;
       type VaultFile = { key: string; name: string; size: number; uploaded: string; contentType: string };
       let selectedKey: string | null = null;
       let currentFiles: VaultFile[] = [];
+      let previewUrls: string[] = [];
       const previewEl = document.getElementById('preview')!;
       const listEl = document.getElementById('file-list')!;
       const breadcrumbEl = document.getElementById('breadcrumb')!;
@@ -101,6 +104,7 @@ import '../../styles/global.css';
         const kind = previewKind(file);
         if (kind === 'image') return '\u{1F5BC}';
         if (kind === 'pdf' || kind === 'text') return '\u{1F4C4}';
+        if (kind === 'docx') return '\u{1F4DD}';
         if (kind === 'video') return '\u{1F3AC}';
         if (kind === 'audio') return '\u{1F3B5}';
         if (contentType.includes('spreadsheet') || contentType.includes('excel')) return '\u{1F4CA}';
@@ -193,9 +197,10 @@ import '../../styles/global.css';
         });
       }
 
-      type PreviewKind = 'image' | 'pdf' | 'video' | 'audio' | 'text' | 'none';
+      type PreviewKind = 'image' | 'pdf' | 'video' | 'audio' | 'text' | 'docx' | 'none';
       const TEXT_EXTS = ['txt', 'md', 'csv', 'json', 'log', 'yml', 'yaml', 'xml', 'tsv'];
       const TEXT_LIMIT = 2 * 1024 * 1024;
+      const DOCX_LIMIT = 25 * 1024 * 1024;
 
       function previewKind(file: VaultFile): PreviewKind {
         const t = file.contentType;
@@ -205,6 +210,7 @@ import '../../styles/global.css';
         if (t.startsWith('video/') || ['mp4', 'mov', 'webm', 'm4v'].includes(ext)) return 'video';
         if (t.startsWith('audio/') || ['mp3', 'm4a', 'wav', 'aac', 'ogg'].includes(ext)) return 'audio';
         if (t.startsWith('text/') || t === 'application/json' || TEXT_EXTS.includes(ext)) return 'text';
+        if (t === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || ext === 'docx') return 'docx';
         return 'none';
       }
 
@@ -215,8 +221,14 @@ import '../../styles/global.css';
         </div>`;
       }
 
+      function releasePreviewUrls() {
+        previewUrls.forEach((url) => URL.revokeObjectURL(url));
+        previewUrls = [];
+      }
+
       async function showPreview(file: VaultFile) {
         selectedKey = file.key;
+        releasePreviewUrls();
         listEl.querySelectorAll<HTMLElement>('[data-select]').forEach((row) => {
           row.classList.toggle('is-selected', row.dataset.select === file.key);
         });
@@ -271,6 +283,29 @@ import '../../styles/global.css';
             pre.textContent = res.ok ? await res.text() : 'Could not load this file.';
             body.replaceChildren(pre);
           }
+        } else if (kind === 'docx') {
+          if (file.size > DOCX_LIMIT) {
+            noPreview(body, src, 'This document is too large to preview.');
+          } else {
+            body.innerHTML = '<p class="vault__preview-empty">Loading...</p>';
+            try {
+              const res = await fetch(src);
+              if (!res.ok) throw new Error(`HTTP ${res.status}`);
+              const doc = await renderDocx(await res.arrayBuffer());
+              if (selectedKey !== file.key) {
+                doc.urls.forEach((url) => URL.revokeObjectURL(url));
+                return;
+              }
+              previewUrls = doc.urls;
+              const note = document.createElement('p');
+              note.className = 'vault__docx-note';
+              note.textContent = 'Simplified preview. Download for exact formatting.';
+              doc.node.prepend(note);
+              body.replaceChildren(doc.node);
+            } catch {
+              if (selectedKey === file.key) noPreview(body, src, 'This document could not be previewed.');
+            }
+          }
         } else {
           noPreview(body, src, 'No preview for this file type.');
         }
@@ -282,6 +317,7 @@ import '../../styles/global.css';
 
       function clearPreview() {
         selectedKey = null;
+        releasePreviewUrls();
         previewEl.innerHTML = '<p class="vault__preview-empty">Select a file to view it here.</p>';
       }
 
@@ -601,6 +637,85 @@ import '../../styles/global.css';
         white-space: pre-wrap;
         overflow-wrap: anywhere;
       }
+      .vault__docx {
+        width: 100%;
+        max-width: 760px;
+        margin: 0 auto;
+        align-self: flex-start;
+        padding: 28px 40px 48px;
+        font-family: 'Inter', sans-serif;
+        font-size: 15px;
+        line-height: 1.65;
+        color: #1c1a17;
+        tab-size: 4;
+      }
+      .vault__docx-note {
+        font-size: 12px;
+        color: #8a8479;
+        padding-bottom: 12px;
+        margin-bottom: 24px;
+        border-bottom: 1px solid #e8e1d2;
+      }
+      .vault__docx p,
+      .vault__docx h1,
+      .vault__docx h2,
+      .vault__docx h3,
+      .vault__docx h4,
+      .vault__docx h5,
+      .vault__docx h6 {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+      .vault__docx p { margin: 0 0 0.6em; }
+      .vault__docx h1,
+      .vault__docx h2,
+      .vault__docx h3,
+      .vault__docx h4,
+      .vault__docx h5,
+      .vault__docx h6 {
+        font-family: 'Fraunces', serif;
+        font-weight: 400;
+        line-height: 1.25;
+        margin: 1.2em 0 0.5em;
+      }
+      .vault__docx h1 { font-size: 28px; }
+      .vault__docx h2 { font-size: 22px; }
+      .vault__docx h3 { font-size: 18px; }
+      .vault__docx h4,
+      .vault__docx h5,
+      .vault__docx h6 { font-size: 16px; font-weight: 500; }
+      .vault__docx strong { font-weight: 600; }
+      .vault__docx em { font-style: italic; }
+      .vault__docx u { text-decoration: underline; }
+      .vault__docx s { text-decoration: line-through; }
+      .vault__docx sup,
+      .vault__docx sub { font-size: 0.75em; }
+      .vault__docx-li { margin-bottom: 0.25em; }
+      .vault__docx-marker {
+        display: inline-block;
+        min-width: 1.5em;
+        margin-left: -1.5em;
+        color: #4a453d;
+      }
+      .vault__docx-link { color: #b4543e; text-decoration: underline; }
+      .vault__docx-img {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        margin: 8px 0;
+      }
+      .vault__docx-table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 0 0 1em;
+        font-size: 14px;
+      }
+      .vault__docx-table td {
+        border: 1px solid #e8e1d2;
+        padding: 6px 10px;
+        vertical-align: top;
+      }
+      .vault__docx-table td p:last-child { margin-bottom: 0; }
       .vault__preview-none {
         margin: auto;
         text-align: center;
@@ -738,6 +853,7 @@ import '../../styles/global.css';
         .vault__row--file { grid-template-columns: 28px 1fr; }
         .vault__preview-head { flex-direction: column; }
         .vault__preview-actions { justify-content: flex-start; }
+        .vault__docx { padding: 20px 16px 32px; }
         .vault__dropzone { display: none; }
       }
     </style>
