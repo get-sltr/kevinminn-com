@@ -32,11 +32,25 @@ export const GET: APIRoute = async ({ url }) => {
   }
 
   const filename = key.split('/').pop() || 'download';
+
+  // ?inline=1 lets the vault viewer frame a PDF. It is honoured for PDFs only, so an
+  // uploaded HTML or SVG file can never render as a page on this origin.
+  const isPdf =
+    object.httpMetadata?.contentType === 'application/pdf' || /\.pdf$/i.test(filename);
+  const inline = url.searchParams.get('inline') === '1' && isPdf;
+  const contentType = isPdf
+    ? 'application/pdf'
+    : object.httpMetadata?.contentType || 'application/octet-stream';
+
+  // Header values must be Latin-1, and macOS screenshot names carry U+202F, so the
+  // real name goes in filename* (RFC 6266) with a plain ASCII fallback beside it.
+  const fallback = filename.replace(/[^\x20-\x7e]|["\\]/g, '_');
   return new Response(object.body, {
     headers: {
-      'Content-Type': object.httpMetadata?.contentType || 'application/octet-stream',
-      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Content-Type': contentType,
+      'Content-Disposition': `${inline ? 'inline' : 'attachment'}; filename="${fallback}"; filename*=UTF-8''${encodeURIComponent(filename)}`,
       'Content-Length': String(object.size),
+      'X-Content-Type-Options': 'nosniff',
     },
   });
 };

@@ -40,8 +40,13 @@ import '../../styles/global.css';
         <p>Drop files here to upload</p>
       </div>
 
-      <div class="vault__list" id="file-list">
-        <p class="vault__empty">Loading...</p>
+      <div class="vault__split">
+        <div class="vault__list" id="file-list">
+          <p class="vault__empty">Loading...</p>
+        </div>
+        <aside class="vault__preview" id="preview">
+          <p class="vault__preview-empty">Select a file to view it here.</p>
+        </aside>
       </div>
 
       <div class="vault__modal" id="delete-modal">
@@ -60,6 +65,10 @@ import '../../styles/global.css';
     <script>
       let currentPrefix = '';
       let deleteTarget: { type: 'file' | 'folder'; key: string } | null = null;
+      type VaultFile = { key: string; name: string; size: number; uploaded: string; contentType: string };
+      let selectedKey: string | null = null;
+      let currentFiles: VaultFile[] = [];
+      const previewEl = document.getElementById('preview')!;
       const listEl = document.getElementById('file-list')!;
       const breadcrumbEl = document.getElementById('breadcrumb')!;
       const searchEl = document.getElementById('search-input') as HTMLInputElement;
@@ -68,6 +77,10 @@ import '../../styles/global.css';
       const modal = document.getElementById('delete-modal')!;
       const deleteText = document.getElementById('delete-text')!;
       const uploadStatus = document.getElementById('upload-status')!;
+
+      function esc(s: string): string {
+        return s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+      }
 
       function formatSize(bytes: number): string {
         if (bytes === 0) return '0 B';
@@ -83,9 +96,13 @@ import '../../styles/global.css';
         });
       }
 
-      function fileIcon(contentType: string): string {
-        if (contentType.startsWith('image/')) return '\u{1F5BC}';
-        if (contentType === 'application/pdf') return '\u{1F4C4}';
+      function fileIcon(file: VaultFile): string {
+        const contentType = file.contentType;
+        const kind = previewKind(file);
+        if (kind === 'image') return '\u{1F5BC}';
+        if (kind === 'pdf' || kind === 'text') return '\u{1F4C4}';
+        if (kind === 'video') return '\u{1F3AC}';
+        if (kind === 'audio') return '\u{1F3B5}';
         if (contentType.includes('spreadsheet') || contentType.includes('excel')) return '\u{1F4CA}';
         if (contentType.includes('zip') || contentType.includes('compressed')) return '\u{1F4E6}';
         return '\u{1F4CE}';
@@ -97,7 +114,7 @@ import '../../styles/global.css';
         let acc = '';
         for (const part of parts) {
           acc += part + '/';
-          html += ` <span class="vault__crumb-sep">/</span> <button class="vault__crumb" data-prefix="${acc}">${part}</button>`;
+          html += ` <span class="vault__crumb-sep">/</span> <button class="vault__crumb" data-prefix="${esc(acc)}">${esc(part)}</button>`;
         }
         breadcrumbEl.innerHTML = html;
         breadcrumbEl.querySelectorAll<HTMLButtonElement>('.vault__crumb').forEach((btn) => {
@@ -115,33 +132,33 @@ import '../../styles/global.css';
         renderList(data.folders, data.files);
       }
 
-      function renderList(folders: Array<{name: string; prefix: string}>, files: Array<{key: string; name: string; size: number; uploaded: string; contentType: string}>) {
+      function renderList(folders: Array<{name: string; prefix: string}>, files: VaultFile[]) {
+        currentFiles = files;
         const query = searchEl.value.toLowerCase();
         let html = '';
 
         for (const folder of folders) {
           if (query && !folder.name.toLowerCase().includes(query)) continue;
-          html += `<div class="vault__row vault__row--folder" data-prefix="${folder.prefix}">
+          html += `<div class="vault__row vault__row--folder" data-prefix="${esc(folder.prefix)}">
             <span class="vault__row-icon">\u{1F4C1}</span>
-            <span class="vault__row-name">${folder.name}</span>
+            <span class="vault__row-name">${esc(folder.name)}</span>
             <span class="vault__row-meta"></span>
             <div class="vault__row-actions">
-              <button class="vault__row-btn vault__row-btn--del" data-delete-folder="${folder.prefix}" title="Delete folder">&#x2715;</button>
+              <button class="vault__row-btn vault__row-btn--del" data-delete-folder="${esc(folder.prefix)}" title="Delete folder">Delete</button>
             </div>
           </div>`;
         }
 
         for (const file of files) {
           if (query && !file.name.toLowerCase().includes(query)) continue;
-          html += `<div class="vault__row vault__row--file">
-            <span class="vault__row-icon">${fileIcon(file.contentType)}</span>
-            <span class="vault__row-name">${file.name}</span>
-            <span class="vault__row-meta">${formatSize(file.size)} &middot; ${formatDate(file.uploaded)}</span>
-            <div class="vault__row-actions">
-              <a class="vault__row-btn" href="/api/vault/download?key=${encodeURIComponent(file.key)}" title="Download">&#x2193;</a>
-              <button class="vault__row-btn vault__row-btn--del" data-delete-file="${file.key}" title="Delete">&#x2715;</button>
-            </div>
-          </div>`;
+          const selected = file.key === selectedKey ? ' is-selected' : '';
+          html += `<button type="button" class="vault__row vault__row--file${selected}" data-select="${esc(file.key)}">
+            <span class="vault__row-icon">${fileIcon(file)}</span>
+            <span class="vault__row-text">
+              <span class="vault__row-name">${esc(file.name)}</span>
+              <span class="vault__row-meta">${formatSize(file.size)} &middot; ${formatDate(file.uploaded)}</span>
+            </span>
+          </button>`;
         }
 
         if (!html) {
@@ -159,11 +176,10 @@ import '../../styles/global.css';
           });
         });
 
-        listEl.querySelectorAll<HTMLButtonElement>('[data-delete-file]').forEach((btn) => {
-          btn.addEventListener('click', () => {
-            deleteTarget = { type: 'file', key: btn.dataset.deleteFile! };
-            deleteText.textContent = `Delete "${btn.dataset.deleteFile!.split('/').pop()}"?`;
-            modal.classList.add('is-open');
+        listEl.querySelectorAll<HTMLButtonElement>('[data-select]').forEach((row) => {
+          row.addEventListener('click', () => {
+            const file = currentFiles.find((f) => f.key === row.dataset.select);
+            if (file) showPreview(file);
           });
         });
 
@@ -175,6 +191,98 @@ import '../../styles/global.css';
             modal.classList.add('is-open');
           });
         });
+      }
+
+      type PreviewKind = 'image' | 'pdf' | 'video' | 'audio' | 'text' | 'none';
+      const TEXT_EXTS = ['txt', 'md', 'csv', 'json', 'log', 'yml', 'yaml', 'xml', 'tsv'];
+      const TEXT_LIMIT = 2 * 1024 * 1024;
+
+      function previewKind(file: VaultFile): PreviewKind {
+        const t = file.contentType;
+        const ext = file.name.includes('.') ? file.name.split('.').pop()!.toLowerCase() : '';
+        if (t.startsWith('image/') || ['png', 'jpg', 'jpeg', 'gif', 'webp', 'avif', 'svg', 'heic'].includes(ext)) return 'image';
+        if (t === 'application/pdf' || ext === 'pdf') return 'pdf';
+        if (t.startsWith('video/') || ['mp4', 'mov', 'webm', 'm4v'].includes(ext)) return 'video';
+        if (t.startsWith('audio/') || ['mp3', 'm4a', 'wav', 'aac', 'ogg'].includes(ext)) return 'audio';
+        if (t.startsWith('text/') || t === 'application/json' || TEXT_EXTS.includes(ext)) return 'text';
+        return 'none';
+      }
+
+      function noPreview(body: HTMLElement, href: string, reason: string) {
+        body.innerHTML = `<div class="vault__preview-none">
+          <p>${esc(reason)}</p>
+          <a class="vault__btn vault__btn--primary" href="${href}">Download to open</a>
+        </div>`;
+      }
+
+      async function showPreview(file: VaultFile) {
+        selectedKey = file.key;
+        listEl.querySelectorAll<HTMLElement>('[data-select]').forEach((row) => {
+          row.classList.toggle('is-selected', row.dataset.select === file.key);
+        });
+
+        const src = `/api/vault/download?key=${encodeURIComponent(file.key)}`;
+        const kind = previewKind(file);
+        previewEl.innerHTML = `<div class="vault__preview-head">
+            <div class="vault__preview-title">
+              <h2 class="vault__preview-name">${esc(file.name)}</h2>
+              <p class="vault__preview-meta">${formatSize(file.size)} &middot; ${formatDate(file.uploaded)}</p>
+            </div>
+            <div class="vault__preview-actions">
+              ${kind === 'pdf' ? `<a class="vault__row-btn" href="${src}&inline=1" target="_blank" rel="noopener">Open in tab</a>` : ''}
+              <a class="vault__row-btn" href="${src}">Download</a>
+              <button type="button" class="vault__row-btn vault__row-btn--del" id="preview-delete">Delete</button>
+            </div>
+          </div>
+          <div class="vault__preview-body" id="preview-body"></div>`;
+
+        document.getElementById('preview-delete')!.addEventListener('click', () => {
+          deleteTarget = { type: 'file', key: file.key };
+          deleteText.textContent = `Delete "${file.name}"?`;
+          modal.classList.add('is-open');
+        });
+
+        const body = document.getElementById('preview-body')!;
+        if (kind === 'image') {
+          const img = document.createElement('img');
+          img.className = 'vault__preview-img';
+          img.alt = file.name;
+          img.src = src;
+          img.addEventListener('error', () => noPreview(body, src, 'This browser cannot display this image.'));
+          body.appendChild(img);
+        } else if (kind === 'pdf') {
+          body.innerHTML = `<iframe class="vault__preview-frame" src="${src}&inline=1" title="${esc(file.name)}"></iframe>`;
+        } else if (kind === 'video' || kind === 'audio') {
+          const media = document.createElement(kind);
+          media.className = `vault__preview-${kind}`;
+          media.controls = true;
+          media.src = src;
+          media.addEventListener('error', () => noPreview(body, src, 'This browser cannot play this file.'));
+          body.appendChild(media);
+        } else if (kind === 'text') {
+          if (file.size > TEXT_LIMIT) {
+            noPreview(body, src, 'This file is too large to preview.');
+          } else {
+            body.innerHTML = '<p class="vault__preview-empty">Loading...</p>';
+            const res = await fetch(src);
+            if (selectedKey !== file.key) return;
+            const pre = document.createElement('pre');
+            pre.className = 'vault__preview-text';
+            pre.textContent = res.ok ? await res.text() : 'Could not load this file.';
+            body.replaceChildren(pre);
+          }
+        } else {
+          noPreview(body, src, 'No preview for this file type.');
+        }
+
+        if (window.matchMedia('(max-width: 900px)').matches) {
+          previewEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+
+      function clearPreview() {
+        selectedKey = null;
+        previewEl.innerHTML = '<p class="vault__preview-empty">Select a file to view it here.</p>';
       }
 
       async function uploadFiles(files: FileList | File[]) {
@@ -230,6 +338,7 @@ import '../../styles/global.css';
         if (!deleteTarget) return;
         if (deleteTarget.type === 'file') {
           await fetch(`/api/vault/delete?key=${encodeURIComponent(deleteTarget.key)}`, { method: 'DELETE' });
+          if (deleteTarget.key === selectedKey) clearPreview();
         } else {
           const res = await fetch(`/api/vault/folder?prefix=${encodeURIComponent(deleteTarget.key)}`, { method: 'DELETE' });
           if (!res.ok) {
@@ -250,13 +359,15 @@ import '../../styles/global.css';
       loadFiles();
     </script>
 
-    <style>
+    <!-- Global because the rows are built by the script above via innerHTML, which never
+         receives Astro's scoping attribute. Every class here is vault__ prefixed. -->
+    <style is:global>
       .vault-body {
         background: #fbf8f3;
         min-height: 100vh;
       }
       .vault {
-        max-width: 960px;
+        max-width: 1280px;
         margin: 0 auto;
         padding: 32px 40px;
       }
@@ -377,10 +488,129 @@ import '../../styles/global.css';
         border-color: #b4543e;
         background: rgba(180, 84, 62, 0.04);
       }
+      .vault__split {
+        display: grid;
+        grid-template-columns: minmax(280px, 380px) 1fr;
+        gap: 24px;
+        align-items: start;
+      }
       .vault__list {
         display: flex;
         flex-direction: column;
+        min-width: 0;
       }
+      .vault__row--file {
+        grid-template-columns: 28px 1fr;
+        width: 100%;
+        background: none;
+        border: none;
+        border-bottom: 1px solid #e8e1d2;
+        text-align: left;
+        cursor: pointer;
+        font: inherit;
+      }
+      .vault__row--file.is-selected {
+        background: #f4efe6;
+        box-shadow: inset 2px 0 0 #b4543e;
+      }
+      .vault__row-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+      .vault__preview {
+        position: sticky;
+        top: 24px;
+        height: calc(100vh - 48px);
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #e8e1d2;
+        border-radius: 4px;
+        background: #fff;
+        min-width: 0;
+        overflow: hidden;
+      }
+      .vault__preview-empty {
+        margin: auto;
+        font-family: 'Fraunces', serif;
+        font-style: italic;
+        font-size: 16px;
+        color: #8a8479;
+        padding: 24px;
+        text-align: center;
+      }
+      .vault__preview-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px 20px;
+        border-bottom: 1px solid #e8e1d2;
+        background: #fbf8f3;
+      }
+      .vault__preview-title { min-width: 0; }
+      .vault__preview-name {
+        font-family: 'Inter', sans-serif;
+        font-size: 15px;
+        font-weight: 500;
+        color: #1c1a17;
+        overflow-wrap: anywhere;
+      }
+      .vault__preview-meta {
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        color: #8a8479;
+        margin-top: 2px;
+      }
+      .vault__preview-actions {
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      .vault__preview-body {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        overflow: auto;
+      }
+      .vault__preview-img,
+      .vault__preview-video {
+        margin: auto;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        padding: 16px;
+      }
+      .vault__preview-audio { margin: auto; width: 90%; }
+      .vault__preview-frame {
+        flex: 1;
+        width: 100%;
+        border: 0;
+      }
+      .vault__preview-text {
+        flex: 1;
+        margin: 0;
+        padding: 20px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 13px;
+        line-height: 1.55;
+        color: #1c1a17;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+      .vault__preview-none {
+        margin: auto;
+        text-align: center;
+        padding: 24px;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        color: #4a453d;
+      }
+      .vault__preview-none p { margin-bottom: 16px; }
+      .vault__preview-none .vault__btn { display: inline-block; text-decoration: none; }
       .vault__row {
         display: grid;
         grid-template-columns: 28px 1fr auto auto;
@@ -412,18 +642,23 @@ import '../../styles/global.css';
         gap: 8px;
         align-items: center;
       }
+      a.vault__row-name { text-decoration: none; }
+      a.vault__row-name:hover { color: #b4543e; text-decoration: underline; }
       .vault__row-btn {
         background: none;
-        border: none;
+        border: 1px solid #e8e1d2;
+        border-radius: 999px;
         cursor: pointer;
-        font-size: 16px;
-        color: #8a8479;
-        padding: 4px;
+        font-family: 'Inter', sans-serif;
+        font-size: 12px;
+        font-weight: 500;
+        color: #4a453d;
+        padding: 5px 12px;
         text-decoration: none;
-        transition: color 0.15s;
+        transition: color 0.15s, border-color 0.15s;
       }
-      .vault__row-btn:hover { color: #1c1a17; }
-      .vault__row-btn--del:hover { color: #b4543e; }
+      .vault__row-btn:hover { color: #1c1a17; border-color: #1c1a17; }
+      .vault__row-btn--del:hover { color: #b4543e; border-color: #b4543e; }
       .vault__empty {
         font-family: 'Fraunces', serif;
         font-style: italic;
@@ -481,6 +716,14 @@ import '../../styles/global.css';
         opacity: 1;
         transform: translateY(0);
       }
+      @media (max-width: 900px) {
+        .vault__split { grid-template-columns: 1fr; }
+        .vault__preview {
+          position: static;
+          height: 80vh;
+          scroll-margin-top: 16px;
+        }
+      }
       @media (max-width: 768px) {
         .vault { padding: 20px 16px; }
         .vault__header { flex-direction: column; align-items: flex-start; gap: 12px; }
@@ -491,7 +734,10 @@ import '../../styles/global.css';
           gap: 8px;
           padding: 12px 4px;
         }
-        .vault__row-meta { display: none; }
+        .vault__row--folder .vault__row-meta { display: none; }
+        .vault__row--file { grid-template-columns: 28px 1fr; }
+        .vault__preview-head { flex-direction: column; }
+        .vault__preview-actions { justify-content: flex-start; }
         .vault__dropzone { display: none; }
       }
     </style>
