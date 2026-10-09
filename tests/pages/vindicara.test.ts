@@ -29,6 +29,8 @@ describe('Vindicara page', () => {
     expect(source).toContain("name: 'AMYNEION'");
     expect(source).toContain('https://amyneion.com');
     expect(source).toContain('autoimmune trial network where patients already live');
+    expect(source).toContain('/assets/ventures/amyneion-logo.png');
+    expect(source).toContain("visualBg: '#0a0e24'");
   });
 
   it('shows the startup programs', () => {

@@ -28,6 +28,12 @@ const vindicaraProjects = [
   {
     name: 'AMYNEION',
     status: 'Autoimmune trials',
+    image: '/assets/ventures/amyneion-logo.png',
+    alt: 'Amyneion amýnō wordmark',
+    // The mark is cream on transparent, drawn for amyneion.com's navy, so it
+    // sits on that navy here rather than disappearing into the paper.
+    visualBg: '#0a0e24',
+    wide: true,
     href: 'https://amyneion.com',
     hrefLabel: 'Visit Amyneion',
     copy:
@@ -64,7 +70,10 @@ const vindicaraProjects = [
             <article class:list={['project-card', project.image && 'project-card--featured']}>
               {
                 project.image && (
-                  <div class="project-visual">
+                  <div
+                    class:list={['project-visual', project.wide && 'project-visual--wide']}
+                    style={project.visualBg && `background: ${project.visualBg}`}
+                  >
                     <img src={project.image} alt={project.alt} loading="lazy" />
                   </div>
                 )
@@ -389,6 +398,10 @@ const vindicaraProjects = [
     width: 28%;
     height: 28%;
     object-fit: contain;
+  }
+  .project-visual--wide img {
+    width: 52%;
+    height: auto;
   }
   .project-card h3 {
     font-family: 'Inter', sans-serif;
