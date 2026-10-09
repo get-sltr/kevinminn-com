@@ -13,6 +13,16 @@ const studioApps = [
     triad: ['Inspired', 'Intelligent', 'Interactive'],
     signup: true,
   },
+  {
+    name: 'Caelia',
+    status: 'Live',
+    image: '/assets/ventures/caelia-logo.jpg',
+    alt: 'Caelia product mark',
+    tagline: 'Video ads that sell, starring AI actors.',
+    copy: 'Paste your product link. Caelia writes the script, casts the actor and renders a ready-to-post ad in minutes.',
+    href: 'https://caelia.io',
+    hrefLabel: 'Visit caelia.io',
+  },
 ];
 ---
 
@@ -63,7 +73,10 @@ const studioApps = [
                       ))}
                     </p>
                   ) : (
-                    <p>{app.copy}</p>
+                    <Fragment>
+                      {app.tagline && <p class="app-triad">{app.tagline}</p>}
+                      <p>{app.copy}</p>
+                    </Fragment>
                   )
                 }
                 {
@@ -227,6 +240,9 @@ const studioApps = [
     font-weight: 400;
     color: #1c1a17;
     line-height: 1.5;
+  }
+  .app-copy .app-triad + p {
+    margin-top: 10px;
   }
   .app-triad .sep {
     color: #b4543e;
@@ -524,8 +540,8 @@ const studioApps = [
   /* ===== PRODUCT LAYOUT ===== */
   /* The hairline grid glued the cards together. Give each room of its own,
      and cap the logo so widening the card does not enlarge the artwork.
-     Centred rather than edge anchored: with Nourished by Mira on its own page
-     this is a single card, and space-between left it stranded at one edge. */
+     Centred rather than edge anchored, so a short row of cards sits in the
+     middle instead of stranded at one edge. */
   .app-grid {
     max-width: none;
     margin-left: 0;

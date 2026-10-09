@@ -14,6 +14,16 @@ describe('SLTR Digital Studio page', () => {
     expect(source).toContain('https://sltrdigitalstudio.com');
   });
 
+  it('lists Caelia with its logo and a link to caelia.io', async () => {
+    expect(source).toContain("name: 'Caelia'");
+    expect(source).toContain("href: 'https://caelia.io'");
+    expect(source).toContain("tagline: 'Video ads that sell, starring AI actors.'");
+    expect(source).toContain('/assets/ventures/caelia-logo.jpg');
+    await expect(
+      stat(new URL('../../public/assets/ventures/caelia-logo.jpg', import.meta.url))
+    ).resolves.toBeTruthy();
+  });
+
   it('renders logos edge to edge rather than boxed inside a panel', () => {
     expect(source).toContain('object-fit: cover;');
   });
