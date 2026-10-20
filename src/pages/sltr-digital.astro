@@ -23,6 +23,16 @@ const studioApps = [
     href: 'https://caelia.io',
     hrefLabel: 'Visit caelia.io',
   },
+  {
+    name: 'Motium',
+    status: 'Live',
+    image: '/assets/ventures/motium-logo.jpg',
+    alt: 'Motium product mark',
+    tagline: 'Uncover talent. Discover potential.',
+    copy: "Motium's AI interviewers talk with every candidate face to face, ask the questions your role needs, and score everyone on the same scale. A person on your team makes every decision.",
+    href: 'https://motium.io',
+    hrefLabel: 'Visit motium.io',
+  },
 ];
 ---
 
@@ -562,6 +572,23 @@ const studioApps = [
     box-shadow:
       0 2px 6px rgba(28, 26, 23, 0.12),
       0 14px 34px rgba(28, 26, 23, 0.14);
+  }
+  /* A raised plate: light catches the top left edge, shade sits bottom right.
+     Drawn on an overlay because the logo image covers the tile. */
+  .app-mark {
+    position: relative;
+  }
+  .app-mark::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 45%, rgba(28, 26, 23, 0.06));
+    box-shadow:
+      inset 3px 3px 2px rgba(255, 255, 255, 0.95),
+      inset -3px -3px 5px rgba(28, 26, 23, 0.16),
+      inset 0 0 0 1px rgba(28, 26, 23, 0.05);
   }
   .app-copy {
     padding: 28px 0 0;

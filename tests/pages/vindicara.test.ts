@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 const source = await readFile(new URL('../../src/pages/vindicara.astro', import.meta.url), 'utf8');
 const axiisiumLogoStats = await stat(
-  new URL('../../public/assets/ventures/axiisium-logo.png', import.meta.url)
+  new URL('../../public/assets/ventures/axiisium-mark.png', import.meta.url)
 );
 
 describe('Vindicara page', () => {
@@ -24,13 +24,13 @@ describe('Vindicara page', () => {
     expect(source).toContain('audit-grade AI for acute myeloid leukemia');
     expect(source).toContain('https://axiisium.com');
     expect(source).toContain('Research use only. Not for diagnostic use.');
-    expect(source).toContain('/assets/ventures/axiisium-logo.png');
+    expect(source).toContain('/assets/ventures/axiisium-mark.png');
 
     expect(source).toContain("name: 'AMYNEION'");
     expect(source).toContain('https://amyneion.com');
     expect(source).toContain('autoimmune trial network where patients already live');
     expect(source).toContain('/assets/ventures/amyneion-logo.png');
-    expect(source).toContain("visualBg: '#0a0e24'");
+    expect(source).toContain("plateBg: '#0a0e24'");
   });
 
   it('shows the startup programs', () => {

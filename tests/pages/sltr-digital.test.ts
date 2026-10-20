@@ -24,6 +24,15 @@ describe('SLTR Digital Studio page', () => {
     ).resolves.toBeTruthy();
   });
 
+  it('lists Motium with its logo and a link to motium.io', async () => {
+    expect(source).toContain("name: 'Motium'");
+    expect(source).toContain("href: 'https://motium.io'");
+    expect(source).toContain('A person on your team makes every decision.');
+    await expect(
+      stat(new URL('../../public/assets/ventures/motium-logo.jpg', import.meta.url))
+    ).resolves.toBeTruthy();
+  });
+
   it('renders logos edge to edge rather than boxed inside a panel', () => {
     expect(source).toContain('object-fit: cover;');
   });

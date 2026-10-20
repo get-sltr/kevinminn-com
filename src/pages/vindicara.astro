@@ -7,8 +7,9 @@ const vindicaraProjects = [
     name: 'PROJECT',
     highlight: 'AIR',
     status: 'Agent accountability',
-    image: '/assets/ventures/project-air-logo.png',
+    image: '/assets/ventures/project-air-mark.png',
     alt: 'Project AIR aircraft logo',
+    plate: true,
     href: 'https://vindicara.io/get-started/',
     hrefLabel: 'Start with Project AIR',
     copy:
@@ -17,8 +18,9 @@ const vindicaraProjects = [
   {
     name: 'AXIISIUM',
     status: 'Oncology AI',
-    image: '/assets/ventures/axiisium-logo.png',
+    image: '/assets/ventures/axiisium-mark.png',
     alt: 'AXIISIUM healthcare AI logo',
+    plate: true,
     href: 'https://axiisium.com',
     hrefLabel: 'Visit Axiisium',
     copy:
@@ -30,10 +32,10 @@ const vindicaraProjects = [
     status: 'Autoimmune trials',
     image: '/assets/ventures/amyneion-logo.png',
     alt: 'Amyneion amýnō wordmark',
-    // The mark is cream on transparent, drawn for amyneion.com's navy, so it
-    // sits on that navy here rather than disappearing into the paper.
-    visualBg: '#0a0e24',
-    wide: true,
+    // The mark is cream on transparent, drawn for amyneion.com's navy, so its
+    // plate is that navy rather than cream, where the mark would disappear.
+    plate: true,
+    plateBg: '#0a0e24',
     href: 'https://amyneion.com',
     hrefLabel: 'Visit Amyneion',
     copy:
@@ -71,10 +73,21 @@ const vindicaraProjects = [
               {
                 project.image && (
                   <div
-                    class:list={['project-visual', project.wide && 'project-visual--wide']}
-                    style={project.visualBg && `background: ${project.visualBg}`}
+                    class:list={[
+                      'project-visual',
+                      project.plate && 'project-visual--plate',
+                    ]}
                   >
-                    <img src={project.image} alt={project.alt} loading="lazy" />
+                    {project.plate ? (
+                      <div
+                        class:list={['logo-plate', project.plateBg && 'logo-plate--dark']}
+                        style={project.plateBg && `background: ${project.plateBg}`}
+                      >
+                        <img src={project.image} alt={project.alt} loading="lazy" />
+                      </div>
+                    ) : (
+                      <img src={project.image} alt={project.alt} loading="lazy" />
+                    )}
                   </div>
                 )
               }
@@ -399,9 +412,52 @@ const vindicaraProjects = [
     height: 28%;
     object-fit: contain;
   }
-  .project-visual--wide img {
-    width: 52%;
-    height: auto;
+  /* The same raised plate the SLTR Digital page uses for its logos: cream
+     tile, light catching the top left edge, shade at the bottom right. */
+  .logo-plate {
+    position: relative;
+    width: 180px;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f7f6f2;
+    border-radius: 4px;
+    box-shadow:
+      0 2px 6px rgba(28, 26, 23, 0.12),
+      0 14px 34px rgba(28, 26, 23, 0.14);
+  }
+  .logo-plate::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 45%, rgba(28, 26, 23, 0.06));
+    box-shadow:
+      inset 3px 3px 2px rgba(255, 255, 255, 0.95),
+      inset -3px -3px 5px rgba(28, 26, 23, 0.16),
+      inset 0 0 0 1px rgba(28, 26, 23, 0.05);
+  }
+  /* Room for the plate's shadow, which overflow: hidden would otherwise cut. */
+  .project-visual--plate {
+    overflow: visible;
+    padding: 40px 0 48px;
+  }
+  .project-visual .logo-plate img {
+    width: 74%;
+    height: 74%;
+  }
+  /* A dark plate catches less light, so the top edge highlight is softer. */
+  .logo-plate--dark::after {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0) 45%, rgba(0, 0, 0, 0.2));
+    box-shadow:
+      inset 2px 2px 2px rgba(255, 255, 255, 0.28),
+      inset -3px -3px 5px rgba(0, 0, 0, 0.45);
+  }
+  .project-visual .logo-plate--dark img {
+    width: 62%;
+    height: 62%;
   }
   .project-card h3 {
     font-family: 'Inter', sans-serif;

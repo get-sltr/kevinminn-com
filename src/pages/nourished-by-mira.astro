@@ -144,6 +144,24 @@ const product = {
       0 2px 6px rgba(28, 26, 23, 0.12),
       0 14px 34px rgba(28, 26, 23, 0.14);
   }
+  /* The same raised plate the studio page gives its logos: light catches the
+     top left edge, shade sits bottom right. Drawn on an overlay because the
+     logo image covers the tile. */
+  .app-mark {
+    position: relative;
+  }
+  .app-mark::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 45%, rgba(28, 26, 23, 0.06));
+    box-shadow:
+      inset 3px 3px 2px rgba(255, 255, 255, 0.95),
+      inset -3px -3px 5px rgba(28, 26, 23, 0.16),
+      inset 0 0 0 1px rgba(28, 26, 23, 0.05);
+  }
   .app-mark img {
     display: block;
     width: 100%;
@@ -202,8 +220,8 @@ const product = {
     color: #b4543e;
   }
 
-  /* Centred, matching the other venture pages. Card interiors stay left
-     aligned, because centred body copy is hard to read. */
+  /* Centred, matching the other venture pages. With one product on the page,
+     the card itself is centred too, so it does not sit off to one side. */
   .hero,
   .venture-section > .app-card,
   .product-label {
@@ -216,7 +234,12 @@ const product = {
     text-align: center;
   }
   .app-card {
-    text-align: left;
+    text-align: center;
+  }
+  .app-card .app-mark,
+  .app-card .app-copy p {
+    margin-left: auto;
+    margin-right: auto;
   }
 
   @media (max-width: 980px) {
