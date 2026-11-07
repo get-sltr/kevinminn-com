@@ -42,11 +42,19 @@ describe('SLTR Digital Studio page', () => {
     expect(source).not.toMatch(/johnson|janssen|J&J/i);
   });
 
-  it('no longer carries Nourished by Mira, which stands on its own page', () => {
-    // Only the pointer comment may mention it. The card, the logo and the App
-    // Store link all live in nourished-by-mira.astro now.
-    expect(source).not.toContain('/assets/ventures/nourished-logo.png');
-    expect(source).not.toContain('https://apps.apple.com/us/app/id6761938171');
-    expect(source).toContain('nourished-by-mira.astro');
+  it('lists Nourished by Mira first, linking to the App Store', async () => {
+    expect(source).toContain("name: 'Nourished by Mira'");
+    expect(source).toContain("href: 'https://apps.apple.com/us/app/id6761938171'");
+    await expect(
+      stat(new URL('../../public/assets/ventures/nourished-logo.png', import.meta.url))
+    ).resolves.toBeTruthy();
+    const order = ['Nourished by Mira', 'Motium', 'Caelia', 'DriftLab HQ'].map((name) =>
+      source.indexOf(`name: '${name}'`)
+    );
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+  });
+
+  it('spreads the four products across the page width', () => {
+    expect(source).toContain('grid-template-columns: repeat(4, minmax(0, 1fr));');
   });
 });
